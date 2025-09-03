@@ -6,7 +6,6 @@ import {
   EstiloDeVida, 
   QueBusco, 
   InformacionProfesional, 
-  Filtros,
   Intereses
 } from '@/components/profile/forms'
 
@@ -51,10 +50,10 @@ export default function PerfilPage() {
           <Intereses />
 
           {/* Información Profesional */}
-          <InformacionProfesional />
-
-          {/* Filtros */}
-          <Filtros />
+          <InformacionProfesional
+            formData={formData}
+            handleInputChange={handleInputChange}
+          />
 
           {/* Botón de Guardar */}
           <div className="pt-6">

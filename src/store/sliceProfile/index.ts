@@ -63,3 +63,21 @@ export {
   clearQueBusco,
   fetchOpcionesQueBusco
 } from './queBuscoSlice'
+
+// Orientación Sexual Slice
+export { default as orientacionSexualReducer } from './orientacionSexualSlice'
+export { 
+  clearError as clearOrientacionSexualError, 
+  clearOrientacionSexual,
+  fetchOpcionesOrientacionSexual
+} from './orientacionSexualSlice'
+
+// Escuelas Coaching Slice
+export { default as escuelasCoachingReducer } from './escuelasCoachingSlice'
+export { 
+  clearError as clearEscuelasCoachingError, 
+  clearEscuelasCoaching,
+  setEscuelaSeleccionada,
+  fetchEscuelasCoaching,
+  crearEscuelaCoaching
+} from './escuelasCoachingSlice'

@@ -9,6 +9,13 @@ export interface Profile {
   genero_secundario_id: string | null
   ubicacion_id: string | null
   opciones_que_busco_id: string | null
+  orientacion_sexual_id: string | null
+  edad_min: number | null
+  edad_max: number | null
+  distancia_maxima: number | null
+  empresa: string | null
+  cargo: string | null
+  escuela_coaching_id: string | null
   info_basica_cargada: boolean
   created_at: string | null
   updated_at: string | null
@@ -34,6 +41,13 @@ export interface ProfileFormData {
   genero_secundario_id: string
   ubicacion_id: string
   opciones_que_busco_id: string
+  orientacion_sexual_id: string
+  edad_min: number
+  edad_max: number
+  distancia_maxima: number
+  empresa: string
+  cargo: string
+  escuela_coaching_id: string
 }
 
 export interface Ubicacion {

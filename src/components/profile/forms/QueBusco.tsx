@@ -2,6 +2,7 @@
 
 import { useQueBusco } from '@/features/profile/hooks/useQueBusco'
 import Select from '@/components/ui/Select'
+import RangeSlider from '@/components/ui/RangeSlider'
 import { ProfileFormData } from '@/shared/types/profile'
 
 interface QueBuscoProps {
@@ -15,13 +16,34 @@ export default function QueBusco({
 }: QueBuscoProps) {
   const { opcionesQueBusco, loading, error } = useQueBusco()
 
+  // Opciones de distancia máxima
+  const opcionesDistancia = [
+    { id: '5', nombre: '5 km' },
+    { id: '10', nombre: '10 km' },
+    { id: '20', nombre: '20 km' },
+    { id: '50', nombre: '50 km' },
+    { id: '100', nombre: '100 km' }
+  ]
+
+  // Manejar cambio del rango de edad
+  const handleEdadRangeChange = (value: [number, number]) => {
+    handleInputChange('edad_min', value[0])
+    handleInputChange('edad_max', value[1])
+  }
+
+  // Obtener el rango de edad actual
+  const edadRange: [number, number] = [
+    formData.edad_min || 18,
+    formData.edad_max || 65
+  ]
+
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
       <h3 className="text-2xl font-semibold text-gray-900 mb-6">
         Qué Busco
       </h3>
 
-      <div className="space-y-6">
+      <div className="space-y-8">
         {/* Select de Qué Busco */}
         <div>
           <Select
@@ -32,6 +54,30 @@ export default function QueBusco({
             options={opcionesQueBusco}
             label="Qué Busco"
             placeholder="Selecciona qué estás buscando"
+          />
+        </div>
+
+        {/* Rango de Edad */}
+        <div>
+          <RangeSlider
+            min={18}
+            max={80}
+            value={edadRange}
+            onChange={handleEdadRangeChange}
+            label="Rango de Edad que Buscas"
+          />
+        </div>
+
+        {/* Distancia Máxima */}
+        <div>
+          <Select
+            id="distancia_maxima"
+            name="distancia_maxima"
+            value={formData.distancia_maxima?.toString() || ''}
+            onChange={(value) => handleInputChange('distancia_maxima', parseInt(value))}
+            options={opcionesDistancia}
+            label="Distancia Máxima"
+            placeholder="Selecciona la distancia máxima"
           />
         </div>
 

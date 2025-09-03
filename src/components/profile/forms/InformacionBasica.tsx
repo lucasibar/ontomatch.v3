@@ -3,6 +3,7 @@
 import Select from '@/components/ui/Select'
 import { ProfileFormData, GeneroPrimario, Ubicacion } from '@/shared/types/profile'
 import { useMemo, useState } from 'react'
+import { useOrientacionSexual } from '@/features/profile/hooks/useOrientacionSexual'
 
 interface InformacionBasicaProps {
   formData: ProfileFormData
@@ -17,6 +18,8 @@ export default function InformacionBasica({
   generosPrimarios,
   ubicaciones
 }: InformacionBasicaProps) {
+  const { opcionesOrientacionSexual, loading: loadingOrientacion, error: errorOrientacion } = useOrientacionSexual()
+  
   // Estados para los selects de ubicación
   const [provinciaSeleccionada, setProvinciaSeleccionada] = useState('')
   const [ciudadSeleccionada, setCiudadSeleccionada] = useState('')
@@ -232,6 +235,33 @@ export default function InformacionBasica({
             required
             placeholder="Selecciona tu género primario"
           />
+        </div>
+
+        {/* Orientación Sexual */}
+        <div>
+          <Select
+            id="orientacion_sexual"
+            name="orientacion_sexual"
+            value={formData.orientacion_sexual_id || ''}
+            onChange={(value) => handleInputChange('orientacion_sexual_id', value)}
+            options={opcionesOrientacionSexual}
+            label="Tu Orientación Sexual"
+            placeholder="Selecciona tu orientación sexual"
+          />
+          
+          {/* Estado de carga para orientación sexual */}
+          {loadingOrientacion && (
+            <div className="mt-2 text-sm text-violet-600">
+              Cargando opciones...
+            </div>
+          )}
+          
+          {/* Error para orientación sexual */}
+          {errorOrientacion && (
+            <div className="mt-2 text-sm text-red-600">
+              ❌ {errorOrientacion}
+            </div>
+          )}
         </div>
       </div>
     </div>
