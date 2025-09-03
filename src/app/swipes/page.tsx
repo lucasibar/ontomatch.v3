@@ -1,4 +1,4 @@
-stra este cartelito 'use client'
+'use client'
 
 import { useAuth } from '@/features/auth/hooks/useAuth'
 import { useProfile } from '@/features/profile/hooks/useProfile'
