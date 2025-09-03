@@ -1,0 +1,6 @@
+export { default as InformacionBasica } from './InformacionBasica'
+export { default as EstiloDeVida } from './EstiloDeVida'
+export { default as QueBusco } from './QueBusco'
+export { default as InformacionProfesional } from './InformacionProfesional'
+export { default as Filtros } from './Filtros'
+export { default as Intereses } from './Intereses'

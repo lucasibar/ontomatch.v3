@@ -26,15 +26,13 @@ export function useSupabaseAuth() {
     // Escuchar cambios en el estado de autenticación
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (event, session) => {
-        console.log('Auth state change:', event, session)
-        
         setSession(session)
         setUser(session?.user ?? null)
         setLoading(false)
 
         // Si es un evento de recuperación de contraseña, configurar la sesión
         if (event === 'PASSWORD_RECOVERY' && session) {
-          console.log('Password recovery event detected')
+          // Manejar recuperación de contraseña si es necesario
         }
       }
     )
