@@ -60,3 +60,15 @@ export interface Ubicacion {
   longitud: string
   created_at: string | null
 }
+
+// CAMPOS OBLIGATORIOS PARA VALIDACIÓN
+export const REQUIRED_FIELDS: (keyof ProfileFormData)[] = [
+  'nombre_completo',
+  'genero_primario_id',
+  'ubicacion_id',
+  'escuela_coaching_id',
+  'opciones_que_busco_id',
+  'edad_min',
+  'edad_max',
+  'distancia_maxima'
+]

@@ -8,11 +8,13 @@ import { ProfileFormData } from '@/shared/types/profile'
 interface QueBuscoProps {
   formData: ProfileFormData
   handleInputChange: (field: keyof ProfileFormData, value: string | number) => void
+  fieldErrors: Record<string, string>
 }
 
 export default function QueBusco({ 
   formData,
-  handleInputChange
+  handleInputChange,
+  fieldErrors
 }: QueBuscoProps) {
   const { opcionesQueBusco, loading, error } = useQueBusco()
 
@@ -54,7 +56,11 @@ export default function QueBusco({
             options={opcionesQueBusco}
             label="Qué Busco"
             placeholder="Selecciona qué estás buscando"
+            required
           />
+          {fieldErrors.opciones_que_busco_id && (
+            <p className="mt-1 text-sm text-red-600">{fieldErrors.opciones_que_busco_id}</p>
+          )}
         </div>
 
         {/* Rango de Edad */}
@@ -66,6 +72,11 @@ export default function QueBusco({
             onChange={handleEdadRangeChange}
             label="Rango de Edad que Buscas"
           />
+          {(fieldErrors.edad_min || fieldErrors.edad_max) && (
+            <p className="mt-1 text-sm text-red-600">
+              {fieldErrors.edad_min || fieldErrors.edad_max}
+            </p>
+          )}
         </div>
 
         {/* Distancia Máxima */}
@@ -78,7 +89,11 @@ export default function QueBusco({
             options={opcionesDistancia}
             label="Distancia Máxima"
             placeholder="Selecciona la distancia máxima"
+            required
           />
+          {fieldErrors.distancia_maxima && (
+            <p className="mt-1 text-sm text-red-600">{fieldErrors.distancia_maxima}</p>
+          )}
         </div>
 
         {/* Estado de carga */}

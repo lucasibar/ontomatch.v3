@@ -7,11 +7,13 @@ import { useState, useRef, useEffect } from 'react'
 interface InformacionProfesionalProps {
   formData: ProfileFormData
   handleInputChange: (field: keyof ProfileFormData, value: string | number) => void
+  fieldErrors: Record<string, string>
 }
 
 export default function InformacionProfesional({ 
   formData,
-  handleInputChange
+  handleInputChange,
+  fieldErrors
 }: InformacionProfesionalProps) {
   const { 
     escuelasFiltradas, 
@@ -134,6 +136,7 @@ export default function InformacionProfesional({
             <div className="relative" ref={dropdownRef}>
               <input
                 id="escuela_coaching"
+                name="escuela_coaching"
                 type="text"
                 value={searchTerm}
                 onChange={(e) => {
@@ -141,7 +144,11 @@ export default function InformacionProfesional({
                   setShowDropdown(true)
                 }}
                 onFocus={() => setShowDropdown(true)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500"
+                className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-violet-500 ${
+                  fieldErrors.escuela_coaching_id 
+                    ? 'border-red-300 focus:border-red-500' 
+                    : 'border-gray-300 focus:border-violet-500'
+                }`}
                 placeholder="Busca tu escuela o escribe para crear una nueva"
                 required
               />
@@ -181,6 +188,11 @@ export default function InformacionProfesional({
                 </div>
               )}
             </div>
+
+            {/* Error de validación */}
+            {fieldErrors.escuela_coaching_id && (
+              <p className="mt-1 text-sm text-red-600">{fieldErrors.escuela_coaching_id}</p>
+            )}
 
             {/* Escuela seleccionada */}
             {escuelaSeleccionada && (

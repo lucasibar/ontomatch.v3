@@ -74,20 +74,6 @@ export default function Intereses() {
         }`}
       >
         <div className="px-8 py-6 space-y-6 border-t border-gray-200">
-          {/* Contador de selecciones */}
-          <div className="p-4 bg-violet-50 rounded-lg border border-violet-200">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-violet-700">
-                Intereses seleccionados: {interesesSeleccionados.length}/10
-              </span>
-              {interesesSeleccionados.length === 10 && (
-                <span className="text-xs text-violet-600 bg-violet-100 px-2 py-1 rounded">
-                  Máximo alcanzado
-                </span>
-              )}
-            </div>
-          </div>
-
           {/* Lista de categorías con intereses */}
           <div className="space-y-8">
             {categorias.map((categoria) => {
