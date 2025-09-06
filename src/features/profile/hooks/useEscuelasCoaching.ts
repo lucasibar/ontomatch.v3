@@ -54,8 +54,9 @@ export const useEscuelasCoaching = () => {
 
     setIsCreating(true)
     try {
-      await dispatch(crearEscuelaCoaching(searchTerm.trim())).unwrap()
-      setSearchTerm('')
+      const nuevaEscuela = await dispatch(crearEscuelaCoaching(searchTerm.trim())).unwrap()
+      // La escuela se selecciona automáticamente en el slice
+      setSearchTerm(nuevaEscuela.nombre)
     } catch (error) {
       console.error('Error al crear escuela:', error)
     } finally {

@@ -39,14 +39,69 @@ export const updateProfile = createAsyncThunk(
         nombre_completo: profileData.nombre_completo,
         descripcion: profileData.descripcion,
         edad: profileData.edad,
-        altura: profileData.altura,
         genero_primario_id: profileData.genero_primario_id,
         genero_secundario_id: profileData.genero_secundario_id || null,
         ubicacion_id: profileData.ubicacion_id,
+        que_busco_id: profileData.que_busco_id || null,
+        orientacion_sexual_id: profileData.orientacion_sexual_id || null,
+        edad_min: profileData.edad_min || null,
+        edad_max: profileData.edad_max || null,
+        distancia_maxima: profileData.distancia_maxima || null,
+        escuela_coaching_id: profileData.escuela_coaching_id || null,
         info_basica_cargada: profileData.info_basica_cargada,
         updated_at: new Date().toISOString()
       })
       .eq('id', profileData.id)
+      .select()
+      .single()
+
+    if (error) throw error
+    return data
+  }
+)
+
+// Thunk para manejar escuela de coaching (crear si no existe, obtener ID si existe)
+export const handleEscuelaCoaching = createAsyncThunk(
+  'profile/handleEscuelaCoaching',
+  async ({ profileId, escuelaNombre }: { profileId: string; escuelaNombre: string }) => {
+    if (!escuelaNombre.trim()) return null
+
+    // Primero buscar si ya existe
+    const { data: existingEscuela, error: searchError } = await supabase
+      .from('escuelas_coaching')
+      .select('id')
+      .eq('nombre', escuelaNombre.trim())
+      .single()
+
+    if (searchError && searchError.code !== 'PGRST116') {
+      throw searchError
+    }
+
+    let escuelaId = existingEscuela?.id
+
+    // Si no existe, crear nueva
+    if (!escuelaId) {
+      const { data: newEscuela, error: createError } = await supabase
+        .from('escuelas_coaching')
+        .insert({
+          nombre: escuelaNombre.trim(),
+          habilitada: true
+        })
+        .select('id')
+        .single()
+
+      if (createError) throw createError
+      escuelaId = newEscuela.id
+    }
+
+    // Actualizar el perfil con el ID de la escuela
+    const { data, error } = await supabase
+      .from('profiles')
+      .update({
+        escuela_coaching_id: escuelaId,
+        updated_at: new Date().toISOString()
+      })
+      .eq('id', profileId)
       .select()
       .single()
 
@@ -98,6 +153,24 @@ const profileSlice = createSlice({
       .addCase(updateProfile.rejected, (state, action) => {
         state.loading = false
         state.error = action.error.message || 'Error al actualizar el perfil'
+      })
+
+    // Handle Escuela Coaching
+    builder
+      .addCase(handleEscuelaCoaching.pending, (state) => {
+        state.loading = true
+        state.error = null
+      })
+      .addCase(handleEscuelaCoaching.fulfilled, (state, action) => {
+        if (action.payload) {
+          state.profile = action.payload
+        }
+        state.loading = false
+        state.error = null
+      })
+      .addCase(handleEscuelaCoaching.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.error.message || 'Error al manejar escuela de coaching'
       })
   },
 })

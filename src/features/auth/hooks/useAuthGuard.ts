@@ -2,23 +2,46 @@
 
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
-import { useAppDispatch } from '@/store/hooks'
+import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { getSession, clearError, clearAuth } from '@/store/sliceAuth/authSlice'
 import { supabase } from '@/lib/supabase'
 
 export function useAuthGuard() {
   const router = useRouter()
   const dispatch = useAppDispatch()
+  const { user, session } = useAppSelector((state) => state.auth)
   const [isLoading, setIsLoading] = useState(true)
   const [isAuthenticated, setIsAuthenticated] = useState(false)
+  const [hasChecked, setHasChecked] = useState(false)
 
   useEffect(() => {
+    // Solo ejecutar una vez
+    if (hasChecked) return
+
     const checkAuth = async () => {
       try {
+        setHasChecked(true)
+        setIsLoading(true)
+        
         // Limpiar errores previos al verificar autenticación
         dispatch(clearError())
         
-        // Verificar si hay sesión activa en Supabase
+        // Si ya hay una sesión en el store, verificar si es válida
+        if (session && user) {
+          // Verificar si el usuario está confirmado
+          if (!user.email_confirmed_at) {
+            // Email no confirmado, redirigir a confirmación
+            router.push('/login/confirm-email')
+            return
+          }
+          
+          // Usuario autenticado y email confirmado
+          setIsAuthenticated(true)
+          setIsLoading(false)
+          return
+        }
+        
+        // Si no hay sesión en el store, verificar con Supabase
         const { data: { session: currentSession } } = await supabase.auth.getSession()
         
         if (!currentSession) {
@@ -50,7 +73,7 @@ export function useAuthGuard() {
     }
 
     checkAuth()
-  }, [router, dispatch])
+  }, [router, dispatch, session, user, hasChecked])
 
   return { isLoading, isAuthenticated }
 }

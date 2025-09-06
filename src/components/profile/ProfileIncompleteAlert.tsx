@@ -7,11 +7,11 @@ export default function ProfileIncompleteAlert() {
     <div className="min-h-screen bg-gray-50 flex items-center justify-center p-4">
       <div className="max-w-md w-full">
         {/* Card de alerta */}
-        <div className="bg-white rounded-lg shadow-lg border border-red-200 p-8 text-center">
+        <div className="bg-white rounded-lg shadow-lg border border-violet-200 p-8 text-center">
           {/* Icono de alerta */}
-          <div className="mx-auto flex items-center justify-center h-16 w-16 rounded-full bg-red-100 mb-6">
+          <div className="mx-auto flex items-center justify-center h-20 w-20 rounded-full bg-gradient-to-br from-violet-100 to-purple-100 mb-6">
             <svg
-              className="h-8 w-8 text-red-600"
+              className="h-10 w-10 text-violet-600"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -20,19 +20,21 @@ export default function ProfileIncompleteAlert() {
                 strokeLinecap="round"
                 strokeLinejoin="round"
                 strokeWidth={2}
-                d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
+                d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
               />
             </svg>
           </div>
 
           {/* Título */}
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">
-            Perfil Incompleto
+          <h2 className="text-3xl font-bold bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent mb-4">
+            ¡Completa tu perfil!
           </h2>
 
           {/* Mensaje */}
-          <p className="text-gray-600 mb-6 leading-relaxed">
-            Para acceder a esta sección, necesitás completar tu perfil con la información básica requerida.
+          <p className="text-gray-600 mb-6 leading-relaxed text-lg">
+            Para encontrar tu match perfecto, necesitamos conocer un poco más sobre vos. 
+            <br />
+            <span className="font-medium text-violet-600">Solo te tomará unos minutos.</span>
           </p>
 
           {/* Botón de acción */}

@@ -85,10 +85,13 @@ export default function RegisterPage() {
     <div className="min-h-screen bg-violet-50 flex items-center justify-center p-4">
       <div className="max-w-md w-full space-y-8">
         <div className="text-center">
-          <div className="mx-auto h-12 w-12 bg-violet-600 rounded-full flex items-center justify-center">
-            <Heart className="h-6 w-6 text-white" />
+          <div className="mx-auto h-16 w-16 bg-gradient-to-br from-violet-600 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
+            <Heart className="h-8 w-8 text-white" />
           </div>
-          <h2 className="mt-6 text-3xl font-bold text-gray-900">
+          <h1 className="mt-6 text-4xl font-bold bg-gradient-to-r from-violet-600 to-purple-600 bg-clip-text text-transparent">
+            OntoMatch
+          </h1>
+          <h2 className="mt-2 text-2xl font-semibold text-gray-700">
             Crear Cuenta
           </h2>
           <p className="mt-2 text-sm text-gray-600">

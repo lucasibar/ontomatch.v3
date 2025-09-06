@@ -22,11 +22,11 @@ export default function ProfileGuard({ children }: ProfileGuardProps) {
     )
   }
 
-  // Si el perfil no está completo, mostrar la alerta
+  // Si info_basica_cargada es false, mostrar la alerta (que redirige a perfil)
   if (!isProfileComplete) {
     return <ProfileIncompleteAlert />
   }
 
-  // Si está permitido, mostrar el contenido
+  // Si info_basica_cargada es true, mostrar swipes
   return <>{children}</>
 }

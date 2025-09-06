@@ -200,26 +200,68 @@ export const fetchOpcionesHabitosAlimentacion = createAsyncThunk(
 export const updateEstiloVida = createAsyncThunk(
   'estiloVida/updateEstiloVida',
   async (estiloVidaData: EstiloVidaFormData & { profileId: string }) => {
-    const { data, error } = await supabase
-      .from('estilos_vida')
-      .upsert({
-        id: estiloVidaData.profileId, // Usar el profileId como id
-        hijos_id: estiloVidaData.hijos_id || null,
-        frecuencia_alcohol_id: estiloVidaData.frecuencia_alcohol_id || null,
-        frecuencia_fumar_id: estiloVidaData.frecuencia_fumar_id || null,
-        ejercicio_id: estiloVidaData.ejercicio_id || null,
-        redes_sociales_id: estiloVidaData.redes_sociales_id || null,
-        habitos_sueno_id: estiloVidaData.habitos_sueno_id || null,
-        signo_zodiacal_id: estiloVidaData.signo_zodiacal_id || null,
-        mascotas_id: estiloVidaData.mascotas_id || null,
-        habitos_alimentacion_id: estiloVidaData.habitos_alimentacion_id || null,
-        created_at: new Date().toISOString()
-      })
-      .select()
+    // Buscar si ya existe un registro para este usuario
+    const { data: profileData, error: profileError } = await supabase
+      .from('profiles')
+      .select('estilo_vida_id')
+      .eq('id', estiloVidaData.profileId)
       .single()
 
-    if (error) throw error
-    return data
+    let result
+    if (profileData?.estilo_vida_id) {
+      // Actualizar registro existente
+      const { data, error } = await supabase
+        .from('estilos_vida')
+        .update({
+          hijos_id: estiloVidaData.hijos_id || null,
+          frecuencia_alcohol_id: estiloVidaData.frecuencia_alcohol_id || null,
+          frecuencia_fumar_id: estiloVidaData.frecuencia_fumar_id || null,
+          ejercicio_id: estiloVidaData.ejercicio_id || null,
+          redes_sociales_id: estiloVidaData.redes_sociales_id || null,
+          habitos_sueno_id: estiloVidaData.habitos_sueno_id || null,
+          signo_zodiacal_id: estiloVidaData.signo_zodiacal_id || null,
+          mascotas_id: estiloVidaData.mascotas_id || null,
+          habitos_alimentacion_id: estiloVidaData.habitos_alimentacion_id || null,
+        })
+        .eq('id', profileData.estilo_vida_id)
+        .select()
+        .single()
+
+      if (error) throw error
+      result = data
+    } else {
+      // Crear nuevo registro
+      const { data, error } = await supabase
+        .from('estilos_vida')
+        .insert({
+          hijos_id: estiloVidaData.hijos_id || null,
+          frecuencia_alcohol_id: estiloVidaData.frecuencia_alcohol_id || null,
+          frecuencia_fumar_id: estiloVidaData.frecuencia_fumar_id || null,
+          ejercicio_id: estiloVidaData.ejercicio_id || null,
+          redes_sociales_id: estiloVidaData.redes_sociales_id || null,
+          habitos_sueno_id: estiloVidaData.habitos_sueno_id || null,
+          signo_zodiacal_id: estiloVidaData.signo_zodiacal_id || null,
+          mascotas_id: estiloVidaData.mascotas_id || null,
+          habitos_alimentacion_id: estiloVidaData.habitos_alimentacion_id || null,
+        })
+        .select()
+        .single()
+
+      if (error) throw error
+      result = data
+      
+      // Actualizar el profile con el nuevo estilo_vida_id
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ estilo_vida_id: result.id })
+        .eq('id', estiloVidaData.profileId)
+      
+      if (updateError) {
+        throw updateError
+      }
+    }
+
+    return result
   }
 )
 

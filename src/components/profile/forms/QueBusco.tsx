@@ -9,12 +9,14 @@ interface QueBuscoProps {
   formData: ProfileFormData
   handleInputChange: (field: keyof ProfileFormData, value: string | number) => void
   fieldErrors: Record<string, string>
+  hasAttemptedSubmit: boolean
 }
 
 export default function QueBusco({ 
   formData,
   handleInputChange,
-  fieldErrors
+  fieldErrors,
+  hasAttemptedSubmit
 }: QueBuscoProps) {
   const { opcionesQueBusco, loading, error } = useQueBusco()
 
@@ -51,15 +53,15 @@ export default function QueBusco({
           <Select
             id="opciones_que_busco"
             name="opciones_que_busco"
-            value={formData.opciones_que_busco_id || ''}
-            onChange={(value) => handleInputChange('opciones_que_busco_id', value)}
+            value={formData.que_busco_id || ''}
+            onChange={(value) => handleInputChange('que_busco_id', value)}
             options={opcionesQueBusco}
             label="Qué Busco"
             placeholder="Selecciona qué estás buscando"
             required
           />
-          {fieldErrors.opciones_que_busco_id && (
-            <p className="mt-1 text-sm text-red-600">{fieldErrors.opciones_que_busco_id}</p>
+          {fieldErrors.que_busco_id && (
+            <p className="mt-1 text-sm text-red-600">{fieldErrors.que_busco_id}</p>
           )}
         </div>
 

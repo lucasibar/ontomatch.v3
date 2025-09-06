@@ -46,6 +46,7 @@ export default function Intereses() {
     <div className="bg-white rounded-lg shadow-sm border border-gray-200">
       {/* Header del acordeón */}
       <button
+        type="button"
         onClick={toggleAccordion}
         className="w-full px-8 py-6 text-left bg-gray-50 hover:bg-gray-100 transition-colors duration-200 flex items-center justify-between"
       >
@@ -100,6 +101,7 @@ export default function Intereses() {
                       return (
                         <button
                           key={interes.id}
+                          type="button"
                           onClick={() => handleToggleInteres(interes.id)}
                           disabled={isDisabled}
                           className={`

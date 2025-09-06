@@ -46,6 +46,8 @@ src/lib/supabase.ts
 .idea/
 *.swp
 *.swo
-
+client-browser.ts
+client-server.ts
+middleware.ts
 # OS
 Thumbs.db

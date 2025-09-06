@@ -98,16 +98,28 @@ export const fetchInteresesUsuario = createAsyncThunk(
 export const guardarInteresesUsuario = createAsyncThunk(
   'intereses/guardarInteresesUsuario',
   async ({ profileId, interesesIds }: { profileId: string; interesesIds: string[] }) => {
+    console.log('🔍 guardarInteresesUsuario - profileId:', profileId, 'interesesIds:', interesesIds)
+    
+    // Verificar la sesión actual
+    const { data: { session } } = await supabase.auth.getSession()
+    console.log('🔍 Sesión actual:', session?.user?.id)
+    
     // Primero eliminar todos los intereses existentes del usuario
+    console.log('🗑️ Eliminando intereses existentes...')
     const { error: deleteError } = await supabase
       .from('profile_intereses')
       .delete()
       .eq('profile_id', profileId)
 
-    if (deleteError) throw deleteError
+    if (deleteError) {
+      console.error('❌ Error eliminando intereses:', deleteError)
+      throw deleteError
+    }
+    console.log('✅ Intereses eliminados correctamente')
 
     // Si no hay intereses para guardar, terminar aquí
     if (interesesIds.length === 0) {
+      console.log('⚠️ No hay intereses para guardar')
       return []
     }
 
@@ -117,12 +129,18 @@ export const guardarInteresesUsuario = createAsyncThunk(
       interes_id: interesId
     }))
 
+    console.log('➕ Insertando nuevos intereses:', interesesParaInsertar)
     const { data, error } = await supabase
       .from('profile_intereses')
       .insert(interesesParaInsertar)
       .select('interes_id')
 
-    if (error) throw error
+    if (error) {
+      console.error('❌ Error insertando intereses:', error)
+      throw error
+    }
+    
+    console.log('✅ Intereses insertados correctamente:', data)
     return data?.map(item => item.interes_id) || []
   }
 )

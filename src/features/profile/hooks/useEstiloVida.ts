@@ -51,12 +51,12 @@ export const useEstiloVida = () => {
     }
   }, [dispatch, user?.id])
 
-  // Limpiar al desmontar
-  useEffect(() => {
-    return () => {
-      dispatch(clearEstiloVida())
-    }
-  }, [dispatch])
+  // Limpiar al desmontar - COMENTADO TEMPORALMENTE
+  // useEffect(() => {
+  //   return () => {
+  //     dispatch(clearEstiloVida())
+  //   }
+  // }, [dispatch])
 
   const handleFormUpdate = (updates: any) => {
     dispatch(updateFormData(updates))

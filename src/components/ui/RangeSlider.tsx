@@ -27,11 +27,16 @@ export default function RangeSlider({
     setIsDragging(handle)
   }
 
-  const handleMouseMove = (e: MouseEvent) => {
-    if (!isDragging || !sliderRef.current) return
+  const handleTouchStart = (e: React.TouchEvent, handle: 'min' | 'max') => {
+    e.preventDefault()
+    setIsDragging(handle)
+  }
+
+  const updateValue = (clientX: number) => {
+    if (!sliderRef.current) return
 
     const rect = sliderRef.current.getBoundingClientRect()
-    const x = e.clientX - rect.left
+    const x = clientX - rect.left
     const width = rect.width
     const percentage = Math.max(0, Math.min(1, x / width))
     const newValue = Math.round(min + percentage * (max - min))
@@ -45,7 +50,22 @@ export default function RangeSlider({
     }
   }
 
+  const handleMouseMove = (e: MouseEvent) => {
+    if (!isDragging) return
+    updateValue(e.clientX)
+  }
+
+  const handleTouchMove = (e: TouchEvent) => {
+    if (!isDragging || e.touches.length === 0) return
+    e.preventDefault()
+    updateValue(e.touches[0].clientX)
+  }
+
   const handleMouseUp = () => {
+    setIsDragging(null)
+  }
+
+  const handleTouchEnd = () => {
     setIsDragging(null)
   }
 
@@ -53,9 +73,13 @@ export default function RangeSlider({
     if (isDragging) {
       document.addEventListener('mousemove', handleMouseMove)
       document.addEventListener('mouseup', handleMouseUp)
+      document.addEventListener('touchmove', handleTouchMove, { passive: false })
+      document.addEventListener('touchend', handleTouchEnd)
       return () => {
         document.removeEventListener('mousemove', handleMouseMove)
         document.removeEventListener('mouseup', handleMouseUp)
+        document.removeEventListener('touchmove', handleTouchMove)
+        document.removeEventListener('touchend', handleTouchEnd)
       }
     }
   }, [isDragging, value])
@@ -89,6 +113,7 @@ export default function RangeSlider({
             className="absolute w-6 h-6 bg-violet-600 rounded-full shadow-lg cursor-grab active:cursor-grabbing transform -translate-y-2 hover:scale-110 transition-transform"
             style={{ left: `${minPercentage}%` }}
             onMouseDown={(e) => handleMouseDown(e, 'min')}
+            onTouchStart={(e) => handleTouchStart(e, 'min')}
           />
           
           {/* Handle máximo */}
@@ -96,6 +121,7 @@ export default function RangeSlider({
             className="absolute w-6 h-6 bg-violet-600 rounded-full shadow-lg cursor-grab active:cursor-grabbing transform -translate-y-2 hover:scale-110 transition-transform"
             style={{ left: `${maxPercentage}%` }}
             onMouseDown={(e) => handleMouseDown(e, 'max')}
+            onTouchStart={(e) => handleTouchStart(e, 'max')}
           />
         </div>
         
@@ -106,36 +132,16 @@ export default function RangeSlider({
         </div>
       </div>
 
-      {/* Valores seleccionados */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-2">
-          <input
-            type="number"
-            min={min}
-            max={value[1] - 1}
-            value={value[0]}
-            onChange={(e) => {
-              const newMin = parseInt(e.target.value) || min
-              onChange([Math.min(newMin, value[1] - 1), value[1]])
-            }}
-            className="w-16 px-3 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-violet-500"
-          />
-          <span className="text-sm text-gray-600">años</span>
+      {/* Valores seleccionados - Solo mostrar los valores sin campos de entrada */}
+      <div className="flex items-center justify-between mt-3">
+        <div className="text-center">
+          <div className="text-lg font-semibold text-violet-600">{value[0]}</div>
+          <div className="text-xs text-gray-500">años</div>
         </div>
         
-        <div className="flex items-center space-x-2">
-          <input
-            type="number"
-            min={value[0] + 1}
-            max={max}
-            value={value[1]}
-            onChange={(e) => {
-              const newMax = parseInt(e.target.value) || max
-              onChange([value[0], Math.max(newMax, value[0] + 1)])
-            }}
-            className="w-16 px-3 py-2 text-sm border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-violet-500"
-          />
-          <span className="text-sm text-gray-600">años</span>
+        <div className="text-center">
+          <div className="text-lg font-semibold text-violet-600">{value[1]}</div>
+          <div className="text-xs text-gray-500">años</div>
         </div>
       </div>
     </div>

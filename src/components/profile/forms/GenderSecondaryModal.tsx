@@ -59,6 +59,7 @@ export default function GenderSecondaryModal({
             Género Secundario
           </h3>
           <button
+            type="button"
             onClick={onClose}
             className="text-gray-400 hover:text-gray-600"
             suppressHydrationWarning={true}
@@ -118,6 +119,7 @@ export default function GenderSecondaryModal({
         {/* Footer */}
         <div className="flex items-center justify-end space-x-3 p-4 border-t border-gray-200">
           <button
+            type="button"
             onClick={handleCancel}
             className="px-4 py-2 text-sm font-medium text-gray-700 bg-gray-100 border border-gray-300 rounded-md hover:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-500"
             suppressHydrationWarning={true}
@@ -125,6 +127,7 @@ export default function GenderSecondaryModal({
             Cancelar
           </button>
           <button
+            type="button"
             onClick={handleConfirm}
             disabled={!selectedId}
             className="px-4 py-2 text-sm font-medium text-white bg-violet-600 border border-transparent rounded-md hover:bg-violet-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-violet-500 disabled:opacity-50 disabled:cursor-not-allowed"

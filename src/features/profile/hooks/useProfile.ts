@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { 
   updateProfile,
+  handleEscuelaCoaching,
   clearProfileError,
   fetchProfile
 } from '@/store/sliceProfile'
@@ -22,7 +22,6 @@ import {
 import { ProfileFormData, REQUIRED_FIELDS } from '@/shared/types/profile'
 
 export function useProfile() {
-  const router = useRouter()
   const dispatch = useAppDispatch()
   const { user } = useAppSelector((state) => state.auth)
   
@@ -40,17 +39,14 @@ export function useProfile() {
     nombre_completo: '',
     descripcion: '',
     edad: 18,
-    altura: null,
     genero_primario_id: '',
     genero_secundario_id: '',
     ubicacion_id: '',
-    opciones_que_busco_id: '',
+    que_busco_id: '',
     orientacion_sexual_id: '',
     edad_min: 18,
     edad_max: 65,
     distancia_maxima: 20,
-    empresa: '',
-    cargo: '',
     escuela_coaching_id: ''
   })
 
@@ -59,16 +55,20 @@ export function useProfile() {
   
   // Estado para controlar si el formulario ya se intentó enviar
   const [hasAttemptedSubmit, setHasAttemptedSubmit] = useState(false)
+  
+  // Estado para controlar si ya se cargaron los datos iniciales
+  const [initialDataLoaded, setInitialDataLoaded] = useState(false)
 
-  // Cargar datos iniciales
+  // Cargar datos iniciales (solo una vez)
   useEffect(() => {
-    if (user?.id) {
+    if (user?.id && !initialDataLoaded) {
       dispatch(fetchProfile(user.id))
       dispatch(fetchGenerosPrimarios())
       dispatch(fetchGenerosSecundarios())
       dispatch(fetchUbicaciones())
+      setInitialDataLoaded(true)
     }
-  }, [user?.id, dispatch])
+  }, [user?.id, dispatch, initialDataLoaded])
 
   // Actualizar formulario cuando se cargue el perfil
   useEffect(() => {
@@ -77,28 +77,21 @@ export function useProfile() {
         nombre_completo: profile.nombre_completo || '',
         descripcion: profile.descripcion || '',
         edad: profile.edad || 18,
-        altura: profile.altura || null,
         genero_primario_id: profile.genero_primario_id || '',
         genero_secundario_id: profile.genero_secundario_id || '',
         ubicacion_id: profile.ubicacion_id || '',
-        opciones_que_busco_id: profile.opciones_que_busco_id || '',
+        que_busco_id: profile.que_busco_id || '',
         orientacion_sexual_id: profile.orientacion_sexual_id || '',
         edad_min: profile.edad_min || 18,
         edad_max: profile.edad_max || 65,
         distancia_maxima: profile.distancia_maxima || 20,
-        empresa: profile.empresa || '',
-        cargo: profile.cargo || '',
         escuela_coaching_id: profile.escuela_coaching_id || ''
       })
     }
   }, [profile])
 
-  // Verificar si debe redirigir a swipes
-  useEffect(() => {
-    if (profile?.info_basica_cargada) {
-      router.push('/swipes')
-    }
-  }, [profile?.info_basica_cargada, router])
+  // La redirección se maneja en PostLoginRedirect, no aquí
+  // para evitar conflictos de doble redirección
 
   // Validar campo específico
   const validateField = (field: keyof ProfileFormData, value: any) => {
@@ -174,32 +167,57 @@ export function useProfile() {
     }
 
     try {
-      // 1. Guardar perfil principal
-      await dispatch(updateProfile({
-        id: profile.id,
-        ...formData,
-        info_basica_cargada: true
-      })).unwrap()
-
-      // 2. Guardar estilo de vida
-      if (estiloVidaFormData) {
-        await dispatch(updateEstiloVida({
+      // Verificar si hay datos de estilo de vida
+      const hasEstiloVidaData = estiloVidaFormData && Object.values(estiloVidaFormData).some(value => value && value.trim() !== '')
+      
+      let estiloVidaId = null
+      
+      if (hasEstiloVidaData) {
+        const estiloVidaResult = await dispatch(updateEstiloVida({
           profileId: profile.id,
           ...estiloVidaFormData
         })).unwrap()
+        estiloVidaId = estiloVidaResult.id
       }
 
-      // 3. Guardar intereses
+      // 1. Guardar perfil principal (incluyendo escuela_coaching_id y estilo_vida_id)
+      await dispatch(updateProfile({
+        id: profile.id,
+        ...formData,
+        info_basica_cargada: true,
+        estilo_vida_id: estiloVidaId
+      } as any)).unwrap()
+
+      // 4. Guardar intereses
+      console.log('🔍 interesesSeleccionados:', interesesSeleccionados)
       if (interesesSeleccionados && interesesSeleccionados.length > 0) {
+        console.log('💾 Guardando intereses...')
         await dispatch(guardarInteresesUsuario({
           profileId: profile.id,
           interesesIds: interesesSeleccionados
         })).unwrap()
+        console.log('✅ Intereses guardados exitosamente')
+      } else {
+        console.log('⚠️ No hay intereses para guardar')
       }
       
-      // La redirección se maneja automáticamente en el useEffect
+      // 5. Redirigir a swipes SOLO después de guardar exitosamente
+      redirectToSwipes()
     } catch (error) {
       console.error('Error al actualizar perfil:', error)
+    }
+  }
+
+  // Función para manejar intereses (sin dependencia circular)
+  const handleToggleInteres = (interesId: string) => {
+    // Esta función se manejará en el componente Intereses directamente
+    // No necesitamos implementarla aquí para evitar dependencias circulares
+  }
+
+  // Función simple para redirigir a swipes después de guardar
+  const redirectToSwipes = () => {
+    if (typeof window !== 'undefined') {
+      window.location.href = '/swipes'
     }
   }
 
@@ -216,6 +234,10 @@ export function useProfile() {
     hasAttemptedSubmit,
     handleInputChange,
     handleSubmit,
-    clearError: () => dispatch(clearProfileError())
+    clearError: () => dispatch(clearProfileError()),
+    // Funciones para Estilo de Vida e Intereses
+    estiloVidaFormData,
+    interesesSeleccionados,
+    handleToggleInteres
   }
 }

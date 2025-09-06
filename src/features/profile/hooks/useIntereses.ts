@@ -11,13 +11,11 @@ import {
   clearInteresesError
 } from '@/store/sliceProfile'
 import { useAuth } from '@/features/auth/hooks/useAuth'
-import { useProfile } from './useProfile'
 import { supabase } from '@/lib/supabase'
 
 export const useIntereses = () => {
   const dispatch = useDispatch<AppDispatch>()
   const { user } = useAuth()
-  const { profile } = useProfile()
   
   const {
     intereses,
@@ -26,6 +24,8 @@ export const useIntereses = () => {
     loading,
     error
   } = useSelector((state: RootState) => state.intereses)
+  
+  const { profile } = useSelector((state: RootState) => state.profile)
 
   const [isSaving, setIsSaving] = useState(false)
 
@@ -54,9 +54,9 @@ export const useIntereses = () => {
         .eq('profile_id', profile.id)
 
       if (error) {
-        // Si es un error de permisos, no mostrar error en consola
-        if (error.code === '42501') {
-          console.log('No hay permisos para acceder a profile_intereses o no hay intereses guardados')
+        // Si es un error de permisos o no existe la tabla, no mostrar error en consola
+        if (error.code === '42501' || error.code === 'PGRST116') {
+          console.log('No hay permisos para acceder a profile_intereses o la tabla no existe')
           // Inicializar con array vacío
           dispatch(setInteresesSeleccionados([]))
           return

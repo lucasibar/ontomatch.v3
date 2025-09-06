@@ -21,7 +21,7 @@ export const signIn = createAsyncThunk(
     if (error) throw error
     
     // Guardar sesión en localStorage
-    if (data.session) {
+    if (data.session && typeof window !== 'undefined') {
       localStorage.setItem('ontomatch_session', JSON.stringify(data.session))
     }
     
@@ -53,7 +53,9 @@ export const signOut = createAsyncThunk(
     if (error) throw error
     
     // Limpiar localStorage
-    localStorage.removeItem('ontomatch_session')
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('ontomatch_session')
+    }
   }
 )
 
@@ -69,8 +71,12 @@ export const getSession = createAsyncThunk(
 export const resetPassword = createAsyncThunk(
   'auth/resetPassword',
   async ({ email }: { email: string }) => {
+    const redirectTo = typeof window !== 'undefined' 
+      ? `${window.location.origin}/login/reset-password`
+      : '/login/reset-password'
+      
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/login/reset-password`,
+      redirectTo,
     })
     if (error) throw error
     return { success: true }
@@ -126,11 +132,19 @@ const authSlice = createSlice({
       state.user = null
       state.session = null
       state.error = null
-      localStorage.removeItem('ontomatch_session')
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('ontomatch_session')
+      }
     },
     initializeFromStorage: (state) => {
+      // Solo acceder a localStorage si estamos en el cliente
+      if (typeof window === 'undefined') {
+        return
+      }
+      
       try {
         const storedSession = localStorage.getItem('ontomatch_session')
+        
         if (storedSession) {
           const session = JSON.parse(storedSession)
           state.session = session
@@ -138,7 +152,9 @@ const authSlice = createSlice({
         }
       } catch (error) {
         console.error('Error loading session from localStorage:', error)
-        localStorage.removeItem('ontomatch_session')
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('ontomatch_session')
+        }
       }
     },
   },
@@ -188,7 +204,9 @@ const authSlice = createSlice({
         state.session = null
         state.error = null
         // Limpiar localStorage también aquí para asegurar consistencia
-        localStorage.removeItem('ontomatch_session')
+        if (typeof window !== 'undefined') {
+          localStorage.removeItem('ontomatch_session')
+        }
       })
       .addCase(signOut.rejected, (state, action) => {
         state.loading = false
