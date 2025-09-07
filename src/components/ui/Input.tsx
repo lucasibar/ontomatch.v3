@@ -1,63 +1,85 @@
-import React from 'react'
-import { cn } from '@/shared/utils/cn'
+import React, { forwardRef } from 'react';
+import { cn } from '@/shared/utils/cn';
 
 interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
-  label?: string
-  error?: string
-  icon?: React.ReactNode
-  rightElement?: React.ReactNode
+  label?: string;
+  error?: string;
+  icon?: React.ReactNode;
+  rightIcon?: React.ReactNode;
+  onRightIconClick?: () => void;
 }
 
-const Input: React.FC<InputProps> = ({
-  label,
-  error,
-  icon,
-  rightElement,
-  className,
-  ...props
-}) => {
-  return (
-    <div className="space-y-2">
-      {label && (
-        <label htmlFor={props.id} className="block text-sm font-medium text-gray-700">
-          {label}
-        </label>
-      )}
-      
-      <div className="relative">
-        {icon && (
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <div className="h-5 w-5 text-gray-400">
+const Input = forwardRef<HTMLInputElement, InputProps>(
+  ({ 
+    label, 
+    error, 
+    icon, 
+    rightIcon, 
+    onRightIconClick, 
+    className, 
+    id, 
+    ...props 
+  }, ref) => {
+    const inputId = id || `input-${Math.random().toString(36).substr(2, 9)}`;
+    
+    const inputClasses = cn(
+      'appearance-none relative block w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:z-10 sm:text-sm',
+      error 
+        ? 'border-red-300 focus:ring-red-500' 
+        : 'border-gray-300 focus:ring-violet-500 focus:border-violet-500',
+      className
+    );
+
+    return (
+      <div>
+        {label && (
+          <label htmlFor={inputId} className="block text-sm font-medium text-gray-700">
+            {label}
+          </label>
+        )}
+        <div className="mt-1 relative">
+          <input
+            ref={ref}
+            id={inputId}
+            className={inputClasses}
+            {...props}
+          />
+          
+          {/* Left Icon */}
+          {icon && (
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
               {icon}
             </div>
-          </div>
-        )}
-        
-        <input
-          className={cn(
-            'appearance-none relative block w-full border border-gray-300 placeholder-gray-500 text-gray-900 rounded-lg focus:outline-none focus:ring-2 focus:ring-violet-500 focus:border-violet-500 transition-colors duration-200',
-            icon ? 'pl-10' : 'pl-3',
-            rightElement ? 'pr-10' : 'pr-3',
-            'py-3 text-sm',
-            error && 'border-red-500 focus:ring-red-500 focus:border-red-500',
-            className
           )}
-          suppressHydrationWarning={true}
-          {...props}
-        />
+          
+          {/* Right Icon */}
+          {rightIcon && (
+            <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
+              {onRightIconClick ? (
+                <button
+                  type="button"
+                  onClick={onRightIconClick}
+                  className="text-gray-400 hover:text-gray-600"
+                >
+                  {rightIcon}
+                </button>
+              ) : (
+                <div className="pointer-events-none">
+                  {rightIcon}
+                </div>
+              )}
+            </div>
+          )}
+        </div>
         
-        {rightElement && (
-          <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
-            {rightElement}
-          </div>
+        {error && (
+          <p className="mt-1 text-sm text-red-600">{error}</p>
         )}
       </div>
-      
-      {error && (
-        <p className="text-sm text-red-600">{error}</p>
-      )}
-    </div>
-  )
-}
+    );
+  }
+);
 
-export default Input
+Input.displayName = 'Input';
+
+export default Input;

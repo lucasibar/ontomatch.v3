@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react'
 import { useAppDispatch } from '@/store/hooks'
-import { initializeFromStorage } from '@/store/sliceAuth/authSlice'
+import { getSession } from '@/store/sliceAuth/authSlice'
 
 export default function StoreInitializer() {
   const dispatch = useAppDispatch()
@@ -12,8 +12,8 @@ export default function StoreInitializer() {
     // Marcar que estamos en el cliente
     setIsClient(true)
     
-    // Inicializar el store con la sesión guardada en localStorage
-    dispatch(initializeFromStorage())
+    // Obtener la sesión actual desde las cookies (manejadas por Supabase SSR)
+    dispatch(getSession())
   }, [dispatch])
 
   // No renderizar nada hasta que estemos en el cliente

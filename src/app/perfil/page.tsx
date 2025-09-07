@@ -12,108 +12,115 @@ import {
 export default function PerfilPage() {
   const { 
     profile, 
-    formData, 
+    loading,
     handleInputChange, 
     generosPrimarios, 
     generosSecundarios, 
     ubicaciones,
     fieldErrors,
-    hasAttemptedSubmit,
-    isFormValid,
     handleSubmit 
   } = useProfile()
 
-  // Calcular progreso del formulario
-  const requiredFields = ['nombre_completo', 'genero_primario_id', 'ubicacion_id', 'escuela_coaching_id', 'que_busco_id', 'edad_min', 'edad_max', 'distancia_maxima']
-  const completedFields = requiredFields.filter(field => {
-    const value = formData[field as keyof typeof formData]
-    return value && (typeof value === 'string' ? value.trim() !== '' : value !== 0)
-  }).length
-  const progressPercentage = (completedFields / requiredFields.length) * 100
+  // Convertir Profile a ProfileFormData
+  const formData = profile ? {
+    nombre_completo: profile.nombre_completo || '',
+    descripcion: profile.descripcion || '',
+    edad: profile.edad || 18,
+    genero_primario_id: profile.genero_primario_id || '',
+    genero_secundario_id: profile.genero_secundario_id || '',
+    ubicacion_id: profile.ubicacion_id || '',
+    que_busco_id: profile.que_busco_id || '',
+    orientacion_sexual_id: profile.orientacion_sexual_id || '',
+    edad_min: profile.edad_min || 18,
+    edad_max: profile.edad_max || 65,
+    distancia_maxima: profile.distancia_maxima || 20,
+    escuela_coaching_id: profile.escuela_coaching_id || ''
+  } : null
+
+  // Mostrar loading mientras se cargan los datos
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="mx-auto h-16 w-16 bg-violet-600 rounded-full flex items-center justify-center animate-spin mb-4">
+            <svg
+              className="h-8 w-8 text-white"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+              />
+            </svg>
+          </div>
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">
+            Cargando tu perfil...
+          </h2>
+          <p className="text-gray-600">
+            Preparando tus datos para edición
+          </p>
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-4xl mx-auto px-4">
         <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Mi Perfil</h1>
-              <p className="text-gray-600 mt-2">Completa tu información para encontrar tu match perfecto</p>
-            </div>
-            <div className="text-right">
-              <div className="text-2xl font-bold text-violet-600">{Math.round(progressPercentage)}%</div>
-              <div className="text-sm text-gray-500">Completado</div>
-            </div>
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900">Mi Perfil</h1>
+            <p className="text-gray-600 mt-2">Completa tu información para encontrar tu match perfecto</p>
           </div>
-          
-          {/* Barra de progreso */}
-          <div className="w-full bg-gray-200 rounded-full h-3 mb-2">
-            <div 
-              className="bg-violet-600 h-3 rounded-full transition-all duration-300 ease-out"
-              style={{ width: `${progressPercentage}%` }}
-            ></div>
-          </div>
-          <p className="text-sm text-gray-500">
-            {completedFields} de {requiredFields.length} campos obligatorios completados
-          </p>
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-8" noValidate>
-          {/* Información Básica */}
-          <InformacionBasica
-            formData={formData}
-            handleInputChange={handleInputChange}
-            generosPrimarios={generosPrimarios}
-            ubicaciones={ubicaciones}
-            fieldErrors={fieldErrors}
-            hasAttemptedSubmit={hasAttemptedSubmit}
-          />
+          {formData && (
+            <>
+              {/* Información Básica */}
+              <InformacionBasica
+                formData={formData}
+                handleInputChange={handleInputChange}
+                generosPrimarios={generosPrimarios}
+                ubicaciones={ubicaciones}
+                fieldErrors={fieldErrors}
+              />
 
-          {/* Qué Busco */}
-          <QueBusco
-            formData={formData}
-            handleInputChange={handleInputChange}
-            fieldErrors={fieldErrors}
-            hasAttemptedSubmit={hasAttemptedSubmit}
-          />
+              {/* Qué Busco */}
+              <QueBusco
+                formData={formData}
+                handleInputChange={handleInputChange}
+                fieldErrors={fieldErrors}
+              />
 
-          {/* Estilo de Vida */}
-          <EstiloDeVida />
+              {/* Estilo de Vida */}
+              <EstiloDeVida />
 
-          {/* Intereses */}
-          <Intereses />
+              {/* Intereses */}
+              <Intereses />
 
-          {/* Información Profesional */}
-          <InformacionProfesional
-            formData={formData}
-            handleInputChange={handleInputChange}
-            fieldErrors={fieldErrors}
-            hasAttemptedSubmit={hasAttemptedSubmit}
-          />
+              {/* Información Profesional */}
+              <InformacionProfesional
+                formData={formData}
+                handleInputChange={handleInputChange}
+                fieldErrors={fieldErrors}
+              />
+            </>
+          )}
 
           {/* Botón de Guardar */}
           <div className="pt-6">
             <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900">¿Listo para guardar?</h3>
-                  <p className="text-sm text-gray-600 mt-1">
-                    {progressPercentage === 100 
-                      ? "¡Perfecto! Tu perfil está completo y listo para encontrar matches."
-                      : `Completa el ${100 - Math.round(progressPercentage)}% restante para activar tu perfil.`
-                    }
-                  </p>
-                </div>
+              <div className="flex justify-center">
                 <button
                   type="submit"
-                  disabled={progressPercentage < 100}
-                  className={`px-8 py-3 rounded-lg font-medium transition-all duration-200 ${
-                    progressPercentage === 100
-                      ? 'bg-violet-600 hover:bg-violet-700 text-white shadow-lg hover:shadow-xl'
-                      : 'bg-gray-300 text-gray-500 cursor-not-allowed'
-                  }`}
+                  className="px-8 py-3 bg-violet-600 hover:bg-violet-700 text-white rounded-lg font-medium transition-all duration-200 shadow-lg hover:shadow-xl"
                 >
-                  {progressPercentage === 100 ? 'Guardar y Activar Perfil' : 'Completar Campos Faltantes'}
+                  Guardar y Activar Perfil
                 </button>
               </div>
             </div>

@@ -14,8 +14,7 @@ export const useLogout = () => {
       // Limpiar cualquier estado local adicional
       dispatch(clearAuth())
       
-      // Limpiar localStorage manualmente por si acaso
-      localStorage.removeItem('ontomatch_session')
+      // Las cookies se limpian automáticamente por Supabase SSR
       
       // Redirigir al login
       router.push('/login/signin')
@@ -28,7 +27,6 @@ export const useLogout = () => {
       
       // Aún así, limpiar todo localmente
       dispatch(clearAuth())
-      localStorage.removeItem('ontomatch_session')
       
       // Redirigir al login
       router.push('/login/signin')

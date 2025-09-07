@@ -11,6 +11,7 @@ import {
   fetchOpcionesSignosZodiacales,
   fetchOpcionesMascotas,
   fetchOpcionesHabitosAlimentacion,
+  fetchEstiloVidaUsuario,
   clearEstiloVidaError,
   updateFormData,
   resetFormData,
@@ -37,6 +38,8 @@ export const useEstiloVida = () => {
     error
   } = useSelector((state: RootState) => state.estiloVida)
 
+  const { profile } = useSelector((state: RootState) => state.profile)
+
   useEffect(() => {
     if (user?.id) {
       dispatch(fetchOpcionesHijos())
@@ -50,6 +53,13 @@ export const useEstiloVida = () => {
       dispatch(fetchOpcionesHabitosAlimentacion())
     }
   }, [dispatch, user?.id])
+
+  // Cargar estilo de vida del usuario cuando esté disponible el profile
+  useEffect(() => {
+    if (user?.id && profile?.id) {
+      dispatch(fetchEstiloVidaUsuario(profile.id))
+    }
+  }, [dispatch, user?.id, profile?.id])
 
   // Limpiar al desmontar - COMENTADO TEMPORALMENTE
   // useEffect(() => {

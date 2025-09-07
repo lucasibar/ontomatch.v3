@@ -12,7 +12,6 @@ interface InformacionBasicaProps {
   generosPrimarios: GeneroPrimario[]
   ubicaciones: Ubicacion[]
   fieldErrors: Record<string, string>
-  hasAttemptedSubmit: boolean
 }
 
 export default function InformacionBasica({
@@ -21,7 +20,6 @@ export default function InformacionBasica({
   generosPrimarios,
   ubicaciones,
   fieldErrors,
-  hasAttemptedSubmit
 }: InformacionBasicaProps) {
   const { opcionesOrientacionSexual, loading: loadingOrientacion, error: errorOrientacion } = useOrientacionSexual()
 
@@ -132,7 +130,7 @@ export default function InformacionBasica({
             placeholder="Tu nombre completo"
             required
           />
-          {hasAttemptedSubmit && fieldErrors.nombre_completo && (
+          {fieldErrors.nombre_completo && (
             <p className="mt-1 text-sm text-red-600">{fieldErrors.nombre_completo}</p>
           )}
         </div>
@@ -159,7 +157,7 @@ export default function InformacionBasica({
               placeholder="Tu edad"
               required
             />
-            {hasAttemptedSubmit && fieldErrors.edad && (
+            {fieldErrors.edad && (
               <p className="mt-1 text-sm text-red-600">{fieldErrors.edad}</p>
             )}
           </div>
@@ -178,7 +176,7 @@ export default function InformacionBasica({
             required
             placeholder="Selecciona tu género primario"
           />
-          {hasAttemptedSubmit && fieldErrors.genero_primario_id && (
+          {fieldErrors.genero_primario_id && (
             <p className="mt-1 text-sm text-red-600">{fieldErrors.genero_primario_id}</p>
           )}
         </div>
@@ -263,7 +261,7 @@ export default function InformacionBasica({
           </div>
 
           {/* Error de ubicación */}
-          {hasAttemptedSubmit && fieldErrors.ubicacion_id && (
+          {fieldErrors.ubicacion_id && (
             <p className="mt-1 text-sm text-red-600">{fieldErrors.ubicacion_id}</p>
           )}
         </div>

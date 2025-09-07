@@ -9,14 +9,12 @@ interface QueBuscoProps {
   formData: ProfileFormData
   handleInputChange: (field: keyof ProfileFormData, value: string | number) => void
   fieldErrors: Record<string, string>
-  hasAttemptedSubmit: boolean
 }
 
 export default function QueBusco({ 
   formData,
   handleInputChange,
-  fieldErrors,
-  hasAttemptedSubmit
+  fieldErrors
 }: QueBuscoProps) {
   const { opcionesQueBusco, loading, error } = useQueBusco()
 

@@ -18,6 +18,7 @@ export default function SimpleSwipesGuard({ children }: SimpleSwipesGuardProps) 
   const { profile, loading: profileLoading } = useProfile()
   const [isLoading, setIsLoading] = useState(true)
   const [hasChecked, setHasChecked] = useState(false)
+  const [profileTimeout, setProfileTimeout] = useState(false)
 
   useEffect(() => {
     if (hasChecked) return
@@ -51,6 +52,50 @@ export default function SimpleSwipesGuard({ children }: SimpleSwipesGuardProps) 
     checkAuth()
   }, [router, user, hasChecked])
 
+  // Timeout para evitar carga infinita del perfil
+  useEffect(() => {
+    if (user && profileLoading) {
+      const timeout = setTimeout(() => {
+        console.log('⏰ SimpleSwipesGuard: Timeout del perfil, forzando carga...')
+        setProfileTimeout(true)
+      }, 5000) // 5 segundos
+
+      return () => clearTimeout(timeout)
+    }
+  }, [user, profileLoading])
+
+  // Verificar el perfil directamente en la base de datos si el estado local no está actualizado
+  useEffect(() => {
+    const verifyProfileInDatabase = async () => {
+      if (!user?.id || !profile) return
+      
+      // Si el perfil local dice que está completo, no verificar
+      if (profile.info_basica_cargada) return
+      
+      try {
+        console.log('🔍 SimpleSwipesGuard: Verificando perfil en BD...')
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('info_basica_cargada')
+          .eq('id', user.id)
+          .single()
+        
+        if (!error && data?.info_basica_cargada) {
+          console.log('✅ SimpleSwipesGuard: Perfil está completo en BD, recargando...')
+          // El perfil está completo en la BD pero no en el estado local, recargar
+          window.location.reload()
+        }
+      } catch (error) {
+        console.error('Error verificando perfil en SimpleSwipesGuard:', error)
+      }
+    }
+
+    // Solo ejecutar si tenemos user y profile
+    if (user?.id && profile) {
+      verifyProfileInDatabase()
+    }
+  }, [user?.id, profile])
+
   // Mostrar loading
   if (isLoading) {
     return (
@@ -73,8 +118,9 @@ export default function SimpleSwipesGuard({ children }: SimpleSwipesGuardProps) 
     return null
   }
 
-  // Mostrar loading mientras se carga el perfil
-  if (profileLoading) {
+  // Mostrar loading solo si no hay perfil Y está cargando (evitar loop infinito)
+  if (!profile && profileLoading && !profileTimeout) {
+    console.log('🔄 SimpleSwipesGuard: Cargando perfil...', { user: !!user, profile: !!profile, profileLoading })
     return (
       <div className="min-h-screen bg-violet-50 flex items-center justify-center">
         <div className="text-center">
@@ -87,6 +133,64 @@ export default function SimpleSwipesGuard({ children }: SimpleSwipesGuardProps) 
         </div>
       </div>
     )
+  }
+
+  // Si hay timeout del perfil, verificar directamente en la BD
+  if (profileTimeout && !profile) {
+    console.log('🚨 SimpleSwipesGuard: Timeout del perfil, verificando en BD...')
+    // Verificar directamente en la BD y redirigir apropiadamente
+    const checkProfileInDB = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('info_basica_cargada')
+          .eq('id', user.id)
+          .single()
+        
+        if (!error && data) {
+          if (data.info_basica_cargada) {
+            // Perfil completo, recargar para actualizar el estado
+            window.location.reload()
+          } else {
+            // Perfil incompleto, ir a completar
+            router.push('/perfil')
+          }
+        } else {
+          // Error o no existe perfil, ir a completar
+          router.push('/perfil')
+        }
+      } catch (error) {
+        console.error('Error verificando perfil en timeout:', error)
+        router.push('/perfil')
+      }
+    }
+    
+    checkProfileInDB()
+    return (
+      <div className="min-h-screen bg-violet-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="mx-auto h-12 w-12 bg-violet-600 rounded-full flex items-center justify-center animate-pulse">
+            <Heart className="h-6 w-6 text-white" />
+          </div>
+          <h2 className="mt-6 text-xl font-semibold text-gray-900">
+            Verificando perfil...
+          </h2>
+        </div>
+      </div>
+    )
+  }
+
+  // Si hay perfil pero está en loading, verificar directamente
+  if (profile && profileLoading) {
+    console.log('🔄 SimpleSwipesGuard: Perfil existe pero loading=true, verificando estado...')
+    // Si el perfil existe pero loading es true, verificar el estado directamente
+    if (profile.info_basica_cargada) {
+      // Perfil completo, mostrar swipes
+      return <>{children}</>
+    } else {
+      // Perfil incompleto, mostrar alerta
+      return <ProfileIncompleteAlert />
+    }
   }
 
   // Si el perfil no está completo, mostrar la alerta

@@ -3,7 +3,6 @@ export { default as profileReducer } from './profileSlice'
 export { 
   clearProfile, 
   updateProfile,
-  handleEscuelaCoaching,
   fetchProfile,
   clearError as clearProfileError
 } from './profileSlice'
@@ -41,6 +40,7 @@ export {
   fetchOpcionesSignosZodiacales,
   fetchOpcionesMascotas,
   fetchOpcionesHabitosAlimentacion,
+  fetchEstiloVidaUsuario,
   updateEstiloVida
 } from './estiloVidaSlice'
 

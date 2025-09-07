@@ -2,43 +2,56 @@ import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { signIn, signUp, signOut } from '@/store/sliceAuth/authSlice'
 import { LoginCredentials, RegisterCredentials } from '@/shared/types/auth'
 
+interface AuthResult {
+  success: boolean;
+  error?: string;
+}
+
 export const useAuth = () => {
   const dispatch = useAppDispatch()
   const { user, session, loading, error } = useAppSelector((state) => state.auth)
 
-  const login = async (credentials: LoginCredentials) => {
+  const handleAuthOperation = async (
+    operation: () => Promise<any>
+  ): Promise<AuthResult> => {
     try {
-      await dispatch(signIn(credentials)).unwrap()
+      await operation()
       return { success: true }
-    } catch (error) {
-      return { success: false, error: error.message }
+    } catch (error: any) {
+      return { 
+        success: false, 
+        error: error?.message || 'Error desconocido' 
+      }
     }
   }
 
-  const register = async (credentials: RegisterCredentials) => {
-    try {
-      await dispatch(signUp(credentials)).unwrap()
-      return { success: true }
-    } catch (error) {
-      return { success: false, error: error.message }
-    }
+  const login = async (credentials: LoginCredentials): Promise<AuthResult> => {
+    return handleAuthOperation(() => 
+      dispatch(signIn(credentials)).unwrap()
+    )
   }
 
-  const logout = async () => {
-    try {
-      await dispatch(signOut()).unwrap()
-      return { success: true }
-    } catch (error) {
-      return { success: false, error: error.message }
-    }
+  const register = async (credentials: RegisterCredentials): Promise<AuthResult> => {
+    return handleAuthOperation(() => 
+      dispatch(signUp(credentials)).unwrap()
+    )
+  }
+
+  const logout = async (): Promise<AuthResult> => {
+    return handleAuthOperation(() => 
+      dispatch(signOut()).unwrap()
+    )
   }
 
   return {
+    // Estado
     user,
     session,
     loading,
     error,
     isAuthenticated: !!user,
+    
+    // Acciones
     login,
     register,
     logout

@@ -196,6 +196,84 @@ export const fetchOpcionesHabitosAlimentacion = createAsyncThunk(
   }
 )
 
+// Thunk para cargar el estilo de vida del usuario
+export const fetchEstiloVidaUsuario = createAsyncThunk(
+  'estiloVida/fetchEstiloVidaUsuario',
+  async (profileId: string) => {
+    // Buscar el estilo_vida_id del perfil
+    const { data: profileData, error: profileError } = await supabase
+      .from('profiles')
+      .select('estilo_vida_id')
+      .eq('id', profileId)
+      .single()
+
+    if (profileError) {
+      // Si no hay estilo_vida_id, retornar datos vacíos
+      return {
+        hijos_id: '',
+        frecuencia_alcohol_id: '',
+        frecuencia_fumar_id: '',
+        ejercicio_id: '',
+        redes_sociales_id: '',
+        habitos_sueno_id: '',
+        signo_zodiacal_id: '',
+        mascotas_id: '',
+        habitos_alimentacion_id: ''
+      }
+    }
+
+    if (!profileData?.estilo_vida_id) {
+      // Si no hay estilo_vida_id, retornar datos vacíos
+      return {
+        hijos_id: '',
+        frecuencia_alcohol_id: '',
+        frecuencia_fumar_id: '',
+        ejercicio_id: '',
+        redes_sociales_id: '',
+        habitos_sueno_id: '',
+        signo_zodiacal_id: '',
+        mascotas_id: '',
+        habitos_alimentacion_id: ''
+      }
+    }
+
+    // Cargar los datos del estilo de vida
+    const { data, error } = await supabase
+      .from('estilos_vida')
+      .select('*')
+      .eq('id', profileData.estilo_vida_id)
+      .single()
+
+    if (error) {
+      // Si hay error, retornar datos vacíos
+      return {
+        hijos_id: '',
+        frecuencia_alcohol_id: '',
+        frecuencia_fumar_id: '',
+        ejercicio_id: '',
+        redes_sociales_id: '',
+        habitos_sueno_id: '',
+        signo_zodiacal_id: '',
+        mascotas_id: '',
+        habitos_alimentacion_id: ''
+      }
+    }
+
+    // Retornar los datos del estilo de vida
+    return {
+      hijos_id: data.hijos_id || '',
+      frecuencia_alcohol_id: data.frecuencia_alcohol_id || '',
+      frecuencia_fumar_id: data.frecuencia_fumar_id || '',
+      ejercicio_id: data.ejercicio_id || '',
+      redes_sociales_id: data.redes_sociales_id || '',
+      habitos_sueno_id: data.habitos_sueno_id || '',
+      signo_zodiacal_id: data.signo_zodiacal_id || '',
+      mascotas_id: data.mascotas_id || '',
+      habitos_alimentacion_id: data.habitos_alimentacion_id || ''
+    }
+  }
+)
+
 // Thunk para actualizar estilo de vida
 export const updateEstiloVida = createAsyncThunk(
   'estiloVida/updateEstiloVida',
@@ -381,6 +459,22 @@ const estiloVidaSlice = createSlice({
       })
       .addCase(fetchOpcionesHabitosAlimentacion.rejected, (state, action) => {
         state.error = action.error.message || 'Error al cargar opciones de hábitos alimentarios'
+      })
+
+    // Fetch Estilo de Vida Usuario
+    builder
+      .addCase(fetchEstiloVidaUsuario.pending, (state) => {
+        state.loading = true
+        state.error = null
+      })
+      .addCase(fetchEstiloVidaUsuario.fulfilled, (state, action) => {
+        state.formData = action.payload
+        state.loading = false
+        state.error = null
+      })
+      .addCase(fetchEstiloVidaUsuario.rejected, (state, action) => {
+        state.loading = false
+        state.error = action.error.message || 'Error al cargar estilo de vida del usuario'
       })
 
     // Update Estilo de Vida

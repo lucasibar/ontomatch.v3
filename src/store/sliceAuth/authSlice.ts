@@ -3,6 +3,17 @@ import { User, Session } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
 import { AuthState } from '@/shared/types/auth'
 
+// Constantes para mensajes de error
+const ERROR_MESSAGES = {
+  SIGN_IN: 'Error al iniciar sesión',
+  SIGN_UP: 'Error al registrarse',
+  SIGN_OUT: 'Error al cerrar sesión',
+  GET_SESSION: 'Error al obtener la sesión',
+  RESET_PASSWORD: 'Error al enviar email de recuperación',
+  RESEND_CONFIRMATION: 'Error al reenviar confirmación',
+  UPDATE_PASSWORD: 'Error al actualizar la contraseña'
+} as const;
+
 const initialState: AuthState = {
   user: null,
   session: null,
@@ -20,11 +31,7 @@ export const signIn = createAsyncThunk(
     })
     if (error) throw error
     
-    // Guardar sesión en localStorage
-    if (data.session && typeof window !== 'undefined') {
-      localStorage.setItem('ontomatch_session', JSON.stringify(data.session))
-    }
-    
+    // Las cookies se manejan automáticamente por Supabase SSR
     return data
   }
 )
@@ -52,10 +59,7 @@ export const signOut = createAsyncThunk(
     const { error } = await supabase.auth.signOut()
     if (error) throw error
     
-    // Limpiar localStorage
-    if (typeof window !== 'undefined') {
-      localStorage.removeItem('ontomatch_session')
-    }
+    // Las cookies se limpian automáticamente por Supabase SSR
   }
 )
 
@@ -132,30 +136,7 @@ const authSlice = createSlice({
       state.user = null
       state.session = null
       state.error = null
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem('ontomatch_session')
-      }
-    },
-    initializeFromStorage: (state) => {
-      // Solo acceder a localStorage si estamos en el cliente
-      if (typeof window === 'undefined') {
-        return
-      }
-      
-      try {
-        const storedSession = localStorage.getItem('ontomatch_session')
-        
-        if (storedSession) {
-          const session = JSON.parse(storedSession)
-          state.session = session
-          state.user = session.user
-        }
-      } catch (error) {
-        console.error('Error loading session from localStorage:', error)
-        if (typeof window !== 'undefined') {
-          localStorage.removeItem('ontomatch_session')
-        }
-      }
+      // Las cookies se limpian automáticamente por Supabase SSR
     },
   },
   extraReducers: (builder) => {
@@ -173,7 +154,7 @@ const authSlice = createSlice({
       })
       .addCase(signIn.rejected, (state, action) => {
         state.loading = false
-        state.error = action.error.message || 'Error al iniciar sesión'
+        state.error = action.error.message || ERROR_MESSAGES.SIGN_IN
       })
 
     // Sign Up
@@ -190,7 +171,7 @@ const authSlice = createSlice({
       })
       .addCase(signUp.rejected, (state, action) => {
         state.loading = false
-        state.error = action.error.message || 'Error al registrarse'
+        state.error = action.error.message || ERROR_MESSAGES.SIGN_UP
       })
 
     // Sign Out
@@ -203,14 +184,11 @@ const authSlice = createSlice({
         state.user = null
         state.session = null
         state.error = null
-        // Limpiar localStorage también aquí para asegurar consistencia
-        if (typeof window !== 'undefined') {
-          localStorage.removeItem('ontomatch_session')
-        }
+        // Las cookies se limpian automáticamente por Supabase SSR
       })
       .addCase(signOut.rejected, (state, action) => {
         state.loading = false
-        state.error = action.error.message || 'Error al cerrar sesión'
+        state.error = action.error.message || ERROR_MESSAGES.SIGN_OUT
       })
 
     // Get Session
@@ -225,7 +203,7 @@ const authSlice = createSlice({
       })
       .addCase(getSession.rejected, (state, action) => {
         state.loading = false
-        state.error = action.error.message || 'Error al obtener la sesión'
+        state.error = action.error.message || ERROR_MESSAGES.GET_SESSION
       })
 
     // Reset Password
@@ -240,7 +218,7 @@ const authSlice = createSlice({
       })
       .addCase(resetPassword.rejected, (state, action) => {
         state.loading = false
-        state.error = action.error.message || 'Error al enviar email de recuperación'
+        state.error = action.error.message || ERROR_MESSAGES.RESET_PASSWORD
       })
 
     // Resend Confirmation
@@ -255,7 +233,7 @@ const authSlice = createSlice({
       })
       .addCase(resendConfirmation.rejected, (state, action) => {
         state.loading = false
-        state.error = action.error.message || 'Error al reenviar confirmación'
+        state.error = action.error.message || ERROR_MESSAGES.RESEND_CONFIRMATION
       })
 
     // Update Password
@@ -270,7 +248,7 @@ const authSlice = createSlice({
       })
       .addCase(updatePassword.rejected, (state, action) => {
         state.loading = false
-        state.error = action.error.message || 'Error al actualizar la contraseña'
+        state.error = action.error.message || ERROR_MESSAGES.UPDATE_PASSWORD
       })
   },
 })
@@ -280,8 +258,7 @@ export const {
   setSession, 
   clearError, 
   setLoading, 
-  clearAuth, 
-  initializeFromStorage 
+  clearAuth
 } = authSlice.actions
 
 export default authSlice.reducer

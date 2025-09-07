@@ -60,55 +60,6 @@ export const updateProfile = createAsyncThunk(
   }
 )
 
-// Thunk para manejar escuela de coaching (crear si no existe, obtener ID si existe)
-export const handleEscuelaCoaching = createAsyncThunk(
-  'profile/handleEscuelaCoaching',
-  async ({ profileId, escuelaNombre }: { profileId: string; escuelaNombre: string }) => {
-    if (!escuelaNombre.trim()) return null
-
-    // Primero buscar si ya existe
-    const { data: existingEscuela, error: searchError } = await supabase
-      .from('escuelas_coaching')
-      .select('id')
-      .eq('nombre', escuelaNombre.trim())
-      .single()
-
-    if (searchError && searchError.code !== 'PGRST116') {
-      throw searchError
-    }
-
-    let escuelaId = existingEscuela?.id
-
-    // Si no existe, crear nueva
-    if (!escuelaId) {
-      const { data: newEscuela, error: createError } = await supabase
-        .from('escuelas_coaching')
-        .insert({
-          nombre: escuelaNombre.trim(),
-          habilitada: true
-        })
-        .select('id')
-        .single()
-
-      if (createError) throw createError
-      escuelaId = newEscuela.id
-    }
-
-    // Actualizar el perfil con el ID de la escuela
-    const { data, error } = await supabase
-      .from('profiles')
-      .update({
-        escuela_coaching_id: escuelaId,
-        updated_at: new Date().toISOString()
-      })
-      .eq('id', profileId)
-      .select()
-      .single()
-
-    if (error) throw error
-    return data
-  }
-)
 
 const profileSlice = createSlice({
   name: 'profile',
@@ -153,24 +104,6 @@ const profileSlice = createSlice({
       .addCase(updateProfile.rejected, (state, action) => {
         state.loading = false
         state.error = action.error.message || 'Error al actualizar el perfil'
-      })
-
-    // Handle Escuela Coaching
-    builder
-      .addCase(handleEscuelaCoaching.pending, (state) => {
-        state.loading = true
-        state.error = null
-      })
-      .addCase(handleEscuelaCoaching.fulfilled, (state, action) => {
-        if (action.payload) {
-          state.profile = action.payload
-        }
-        state.loading = false
-        state.error = null
-      })
-      .addCase(handleEscuelaCoaching.rejected, (state, action) => {
-        state.loading = false
-        state.error = action.error.message || 'Error al manejar escuela de coaching'
       })
   },
 })

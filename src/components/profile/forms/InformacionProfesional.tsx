@@ -8,7 +8,6 @@ interface InformacionProfesionalProps {
   formData: ProfileFormData
   handleInputChange: (field: keyof ProfileFormData, value: string | number) => void
   fieldErrors: Record<string, string>
-  hasAttemptedSubmit: boolean
 }
 
 // Lista de escuelas que ya existen en la base de datos
@@ -20,11 +19,10 @@ const ESCUELAS_COMUNES = [
   { id: '5361bbca-dd18-44ca-848f-32ef815d3bd3', nombre: 'Escuela de Liderazgo y Coaching' }
 ]
 
-export default function InformacionProfesional({ 
+export default function InformacionProfesional({
   formData,
   handleInputChange,
-  fieldErrors,
-  hasAttemptedSubmit
+  fieldErrors
 }: InformacionProfesionalProps) {
   const [isAccordionOpen, setIsAccordionOpen] = useState(false)
 

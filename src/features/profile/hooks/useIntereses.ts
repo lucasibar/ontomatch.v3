@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux'
 import { AppDispatch, RootState } from '@/store/store'
+import { supabase } from '@/lib/supabase'
 import { 
   fetchIntereses,
   fetchCategoriasIntereses,
@@ -11,7 +12,6 @@ import {
   clearInteresesError
 } from '@/store/sliceProfile'
 import { useAuth } from '@/features/auth/hooks/useAuth'
-import { supabase } from '@/lib/supabase'
 
 export const useIntereses = () => {
   const dispatch = useDispatch<AppDispatch>()
@@ -40,41 +40,11 @@ export const useIntereses = () => {
   // Cargar intereses del usuario cuando esté disponible el profile
   useEffect(() => {
     if (user?.id && profile?.id) {
-      cargarInteresesUsuario()
-    }
-  }, [user?.id, profile?.id])
-
-  const cargarInteresesUsuario = async () => {
-    if (!profile?.id) return
-    
-    try {
-      const { data, error } = await supabase
-        .from('profile_intereses')
-        .select('interes_id')
-        .eq('profile_id', profile.id)
-
-      if (error) {
-        // Si es un error de permisos o no existe la tabla, no mostrar error en consola
-        if (error.code === '42501' || error.code === 'PGRST116') {
-          console.log('No hay permisos para acceder a profile_intereses o la tabla no existe')
-          // Inicializar con array vacío
-          dispatch(setInteresesSeleccionados([]))
-          return
-        }
-        
-        console.error('Error al cargar intereses del usuario:', error)
-        return
-      }
-
-      // Si no hay datos, inicializar con array vacío
-      const interesesIds = data?.map(item => item.interes_id) || []
-      dispatch(setInteresesSeleccionados(interesesIds))
-    } catch (error) {
-      console.error('Error al cargar intereses del usuario:', error)
-      // En caso de error, inicializar con array vacío
+      // Por ahora, inicializar como vacío hasta resolver el problema de acceso
+      console.log('ℹ️ Inicializando intereses como vacío (problema de acceso a BD)')
       dispatch(setInteresesSeleccionados([]))
     }
-  }
+  }, [dispatch, user?.id, profile?.id])
 
   const handleToggleInteres = (interesId: string) => {
     dispatch(toggleInteres(interesId))
