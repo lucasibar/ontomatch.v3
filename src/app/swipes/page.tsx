@@ -1,14 +1,14 @@
 'use client'
 
 import { useAuth } from '@/features/auth/hooks/useAuth'
-import { useProfile } from '@/features/profile/hooks/useProfile'
+import { useProfileForm } from '@/features/profile/hooks/useProfileForm'
 import SimpleSwipesGuard from '@/components/auth/SimpleSwipesGuard'
 import Link from 'next/link'
 import { useState } from 'react'
 
 function SwipesContent() {
   const { user } = useAuth()
-  const { profile } = useProfile()
+  const { profile } = useProfileForm()
   const [isMenuOpen, setIsMenuOpen] = useState(false)
 
   const toggleMenu = () => {

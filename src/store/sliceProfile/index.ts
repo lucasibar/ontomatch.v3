@@ -3,6 +3,7 @@ export { default as profileReducer } from './profileSlice'
 export { 
   clearProfile, 
   updateProfile,
+  updateProfileLocal,
   fetchProfile,
   clearError as clearProfileError
 } from './profileSlice'
@@ -28,8 +29,6 @@ export {
 export { default as estiloVidaReducer } from './estiloVidaSlice'
 export { 
   clearError as clearEstiloVidaError, 
-  updateFormData, 
-  resetFormData, 
   clearEstiloVida,
   fetchOpcionesHijos,
   fetchOpcionesFrecuenciaAlcohol,
@@ -39,22 +38,16 @@ export {
   fetchOpcionesHabitosSueno,
   fetchOpcionesSignosZodiacales,
   fetchOpcionesMascotas,
-  fetchOpcionesHabitosAlimentacion,
-  fetchEstiloVidaUsuario,
-  updateEstiloVida
+  fetchOpcionesHabitosAlimentacion
 } from './estiloVidaSlice'
 
 // Intereses Slice
 export { default as interesesReducer } from './interesesSlice'
 export { 
   clearError as clearInteresesError, 
-  toggleInteres, 
-  setInteresesSeleccionados, 
   clearIntereses,
   fetchIntereses,
-  fetchCategoriasIntereses,
-  fetchInteresesUsuario,
-  guardarInteresesUsuario
+  fetchCategoriasIntereses
 } from './interesesSlice'
 
 // Qué Busco Slice
@@ -82,3 +75,13 @@ export {
   fetchEscuelasCoaching,
   crearEscuelaCoaching
 } from './escuelasCoachingSlice'
+
+// Info Profesional Slice
+export { default as infoProfesionalReducer } from './infoProfesionalSlice'
+export { 
+  clearError as clearInfoProfesionalError, 
+  updateFormData as updateInfoProfesionalFormData,
+  clearFormData as clearInfoProfesionalFormData,
+  fetchInfoProfesionalUsuario,
+  updateInfoProfesional
+} from './infoProfesionalSlice'

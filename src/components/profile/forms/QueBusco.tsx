@@ -1,22 +1,20 @@
 'use client'
 
-import { useQueBusco } from '@/features/profile/hooks/useQueBusco'
+import { useState, useEffect } from 'react'
+import { useAppDispatch, useAppSelector } from '@/store/hooks'
+import { updateProfileLocal } from '@/store/sliceProfile'
 import Select from '@/components/ui/Select'
 import RangeSlider from '@/components/ui/RangeSlider'
-import { ProfileFormData } from '@/shared/types/profile'
 
-interface QueBuscoProps {
-  formData: ProfileFormData
-  handleInputChange: (field: keyof ProfileFormData, value: string | number) => void
-  fieldErrors: Record<string, string>
-}
-
-export default function QueBusco({ 
-  formData,
-  handleInputChange,
-  fieldErrors
-}: QueBuscoProps) {
-  const { opcionesQueBusco, loading, error } = useQueBusco()
+export default function QueBusco() {
+  const dispatch = useAppDispatch()
+  
+  // Estados de Redux
+  const { profile } = useAppSelector((state) => state.profile)
+  const { opcionesQueBusco, error } = useAppSelector((state) => state.queBusco)
+  
+  // Estado local para errores
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
 
   // Opciones de distancia máxima
   const opcionesDistancia = [
@@ -27,6 +25,11 @@ export default function QueBusco({
     { id: '100', nombre: '100 km' }
   ]
 
+  // Función para manejar cambios
+  const handleInputChange = (field: string, value: string | number | null) => {
+    dispatch(updateProfileLocal({ [field]: value }))
+  }
+
   // Manejar cambio del rango de edad
   const handleEdadRangeChange = (value: [number, number]) => {
     handleInputChange('edad_min', value[0])
@@ -35,8 +38,8 @@ export default function QueBusco({
 
   // Obtener el rango de edad actual
   const edadRange: [number, number] = [
-    formData.edad_min || 18,
-    formData.edad_max || 65
+    profile.edad_min || 18,
+    profile.edad_max || 65
   ]
 
   return (
@@ -51,7 +54,7 @@ export default function QueBusco({
           <Select
             id="opciones_que_busco"
             name="opciones_que_busco"
-            value={formData.que_busco_id || ''}
+            value={profile.que_busco_id || ''}
             onChange={(value) => handleInputChange('que_busco_id', value)}
             options={opcionesQueBusco}
             label="Qué Busco"
@@ -84,7 +87,7 @@ export default function QueBusco({
           <Select
             id="distancia_maxima"
             name="distancia_maxima"
-            value={formData.distancia_maxima?.toString() || ''}
+            value={profile.distancia_maxima?.toString() || ''}
             onChange={(value) => handleInputChange('distancia_maxima', parseInt(value))}
             options={opcionesDistancia}
             label="Distancia Máxima"
@@ -96,18 +99,6 @@ export default function QueBusco({
           )}
         </div>
 
-        {/* Estado de carga */}
-        {loading && (
-          <div className="text-center">
-            <div className="inline-flex items-center px-4 py-2 text-sm text-violet-700 bg-violet-100 rounded-md">
-              <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-violet-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-              </svg>
-              Cargando opciones...
-            </div>
-          </div>
-        )}
 
         {/* Error */}
         {error && (

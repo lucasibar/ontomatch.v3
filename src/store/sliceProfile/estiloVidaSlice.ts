@@ -10,19 +10,6 @@ export interface OpcionEstiloVida {
   created_at: string | null
 }
 
-// Tipos para el formulario de estilo de vida
-export interface EstiloVidaFormData {
-  hijos_id: string
-  frecuencia_alcohol_id: string
-  frecuencia_fumar_id: string
-  ejercicio_id: string
-  redes_sociales_id: string
-  habitos_sueno_id: string
-  signo_zodiacal_id: string
-  mascotas_id: string
-  habitos_alimentacion_id: string
-}
-
 export interface EstiloVidaState {
   // Opciones disponibles
   opcionesHijos: OpcionEstiloVida[]
@@ -34,9 +21,6 @@ export interface EstiloVidaState {
   opcionesSignosZodiacales: OpcionEstiloVida[]
   opcionesMascotas: OpcionEstiloVida[]
   opcionesHabitosAlimentacion: OpcionEstiloVida[]
-  
-  // Estado del formulario
-  formData: EstiloVidaFormData
   loading: boolean
   error: string | null
 }
@@ -52,19 +36,6 @@ const initialState: EstiloVidaState = {
   opcionesSignosZodiacales: [],
   opcionesMascotas: [],
   opcionesHabitosAlimentacion: [],
-  
-  // Estado del formulario
-  formData: {
-    hijos_id: '',
-    frecuencia_alcohol_id: '',
-    frecuencia_fumar_id: '',
-    ejercicio_id: '',
-    redes_sociales_id: '',
-    habitos_sueno_id: '',
-    signo_zodiacal_id: '',
-    mascotas_id: '',
-    habitos_alimentacion_id: ''
-  },
   loading: false,
   error: null,
 }
@@ -197,151 +168,7 @@ export const fetchOpcionesHabitosAlimentacion = createAsyncThunk(
 )
 
 // Thunk para cargar el estilo de vida del usuario
-export const fetchEstiloVidaUsuario = createAsyncThunk(
-  'estiloVida/fetchEstiloVidaUsuario',
-  async (profileId: string) => {
-    // Buscar el estilo_vida_id del perfil
-    const { data: profileData, error: profileError } = await supabase
-      .from('profiles')
-      .select('estilo_vida_id')
-      .eq('id', profileId)
-      .single()
 
-    if (profileError) {
-      // Si no hay estilo_vida_id, retornar datos vacíos
-      return {
-        hijos_id: '',
-        frecuencia_alcohol_id: '',
-        frecuencia_fumar_id: '',
-        ejercicio_id: '',
-        redes_sociales_id: '',
-        habitos_sueno_id: '',
-        signo_zodiacal_id: '',
-        mascotas_id: '',
-        habitos_alimentacion_id: ''
-      }
-    }
-
-    if (!profileData?.estilo_vida_id) {
-      // Si no hay estilo_vida_id, retornar datos vacíos
-      return {
-        hijos_id: '',
-        frecuencia_alcohol_id: '',
-        frecuencia_fumar_id: '',
-        ejercicio_id: '',
-        redes_sociales_id: '',
-        habitos_sueno_id: '',
-        signo_zodiacal_id: '',
-        mascotas_id: '',
-        habitos_alimentacion_id: ''
-      }
-    }
-
-    // Cargar los datos del estilo de vida
-    const { data, error } = await supabase
-      .from('estilos_vida')
-      .select('*')
-      .eq('id', profileData.estilo_vida_id)
-      .single()
-
-    if (error) {
-      // Si hay error, retornar datos vacíos
-      return {
-        hijos_id: '',
-        frecuencia_alcohol_id: '',
-        frecuencia_fumar_id: '',
-        ejercicio_id: '',
-        redes_sociales_id: '',
-        habitos_sueno_id: '',
-        signo_zodiacal_id: '',
-        mascotas_id: '',
-        habitos_alimentacion_id: ''
-      }
-    }
-
-    // Retornar los datos del estilo de vida
-    return {
-      hijos_id: data.hijos_id || '',
-      frecuencia_alcohol_id: data.frecuencia_alcohol_id || '',
-      frecuencia_fumar_id: data.frecuencia_fumar_id || '',
-      ejercicio_id: data.ejercicio_id || '',
-      redes_sociales_id: data.redes_sociales_id || '',
-      habitos_sueno_id: data.habitos_sueno_id || '',
-      signo_zodiacal_id: data.signo_zodiacal_id || '',
-      mascotas_id: data.mascotas_id || '',
-      habitos_alimentacion_id: data.habitos_alimentacion_id || ''
-    }
-  }
-)
-
-// Thunk para actualizar estilo de vida
-export const updateEstiloVida = createAsyncThunk(
-  'estiloVida/updateEstiloVida',
-  async (estiloVidaData: EstiloVidaFormData & { profileId: string }) => {
-    // Buscar si ya existe un registro para este usuario
-    const { data: profileData, error: profileError } = await supabase
-      .from('profiles')
-      .select('estilo_vida_id')
-      .eq('id', estiloVidaData.profileId)
-      .single()
-
-    let result
-    if (profileData?.estilo_vida_id) {
-      // Actualizar registro existente
-      const { data, error } = await supabase
-        .from('estilos_vida')
-        .update({
-          hijos_id: estiloVidaData.hijos_id || null,
-          frecuencia_alcohol_id: estiloVidaData.frecuencia_alcohol_id || null,
-          frecuencia_fumar_id: estiloVidaData.frecuencia_fumar_id || null,
-          ejercicio_id: estiloVidaData.ejercicio_id || null,
-          redes_sociales_id: estiloVidaData.redes_sociales_id || null,
-          habitos_sueno_id: estiloVidaData.habitos_sueno_id || null,
-          signo_zodiacal_id: estiloVidaData.signo_zodiacal_id || null,
-          mascotas_id: estiloVidaData.mascotas_id || null,
-          habitos_alimentacion_id: estiloVidaData.habitos_alimentacion_id || null,
-        })
-        .eq('id', profileData.estilo_vida_id)
-        .select()
-        .single()
-
-      if (error) throw error
-      result = data
-    } else {
-      // Crear nuevo registro
-      const { data, error } = await supabase
-        .from('estilos_vida')
-        .insert({
-          hijos_id: estiloVidaData.hijos_id || null,
-          frecuencia_alcohol_id: estiloVidaData.frecuencia_alcohol_id || null,
-          frecuencia_fumar_id: estiloVidaData.frecuencia_fumar_id || null,
-          ejercicio_id: estiloVidaData.ejercicio_id || null,
-          redes_sociales_id: estiloVidaData.redes_sociales_id || null,
-          habitos_sueno_id: estiloVidaData.habitos_sueno_id || null,
-          signo_zodiacal_id: estiloVidaData.signo_zodiacal_id || null,
-          mascotas_id: estiloVidaData.mascotas_id || null,
-          habitos_alimentacion_id: estiloVidaData.habitos_alimentacion_id || null,
-        })
-        .select()
-        .single()
-
-      if (error) throw error
-      result = data
-      
-      // Actualizar el profile con el nuevo estilo_vida_id
-      const { error: updateError } = await supabase
-        .from('profiles')
-        .update({ estilo_vida_id: result.id })
-        .eq('id', estiloVidaData.profileId)
-      
-      if (updateError) {
-        throw updateError
-      }
-    }
-
-    return result
-  }
-)
 
 const estiloVidaSlice = createSlice({
   name: 'estiloVida',
@@ -349,12 +176,6 @@ const estiloVidaSlice = createSlice({
   reducers: {
     clearError: (state) => {
       state.error = null
-    },
-    updateFormData: (state, action: PayloadAction<Partial<EstiloVidaFormData>>) => {
-      state.formData = { ...state.formData, ...action.payload }
-    },
-    resetFormData: (state) => {
-      state.formData = initialState.formData
     },
     clearEstiloVida: (state) => {
       state.opcionesHijos = []
@@ -366,7 +187,6 @@ const estiloVidaSlice = createSlice({
       state.opcionesSignosZodiacales = []
       state.opcionesMascotas = []
       state.opcionesHabitosAlimentacion = []
-      state.formData = initialState.formData
       state.error = null
     }
   },
@@ -461,43 +281,11 @@ const estiloVidaSlice = createSlice({
         state.error = action.error.message || 'Error al cargar opciones de hábitos alimentarios'
       })
 
-    // Fetch Estilo de Vida Usuario
-    builder
-      .addCase(fetchEstiloVidaUsuario.pending, (state) => {
-        state.loading = true
-        state.error = null
-      })
-      .addCase(fetchEstiloVidaUsuario.fulfilled, (state, action) => {
-        state.formData = action.payload
-        state.loading = false
-        state.error = null
-      })
-      .addCase(fetchEstiloVidaUsuario.rejected, (state, action) => {
-        state.loading = false
-        state.error = action.error.message || 'Error al cargar estilo de vida del usuario'
-      })
-
-    // Update Estilo de Vida
-    builder
-      .addCase(updateEstiloVida.pending, (state) => {
-        state.loading = true
-        state.error = null
-      })
-      .addCase(updateEstiloVida.fulfilled, (state) => {
-        state.loading = false
-        state.error = null
-      })
-      .addCase(updateEstiloVida.rejected, (state, action) => {
-        state.loading = false
-        state.error = action.error.message || 'Error al actualizar estilo de vida'
-      })
   },
 })
 
 export const { 
   clearError, 
-  updateFormData, 
-  resetFormData, 
   clearEstiloVida 
 } = estiloVidaSlice.actions
 

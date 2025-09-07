@@ -42,6 +42,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             ref={ref}
             id={inputId}
             className={inputClasses}
+            suppressHydrationWarning={true}
             {...props}
           />
           

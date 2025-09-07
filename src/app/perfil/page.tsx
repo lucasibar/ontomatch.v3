@@ -1,6 +1,6 @@
 'use client'
 
-import { useProfile } from '@/features/profile/hooks/useProfile'
+import { useProfileForm } from '@/features/profile/hooks/useProfileForm'
 import { 
   InformacionBasica, 
   EstiloDeVida, 
@@ -11,31 +11,10 @@ import {
 
 export default function PerfilPage() {
   const { 
-    profile, 
+    profile, // Ahora profile ya tiene todos los datos completos
     loading,
-    handleInputChange, 
-    generosPrimarios, 
-    generosSecundarios, 
-    ubicaciones,
-    fieldErrors,
-    handleSubmit 
-  } = useProfile()
-
-  // Convertir Profile a ProfileFormData
-  const formData = profile ? {
-    nombre_completo: profile.nombre_completo || '',
-    descripcion: profile.descripcion || '',
-    edad: profile.edad || 18,
-    genero_primario_id: profile.genero_primario_id || '',
-    genero_secundario_id: profile.genero_secundario_id || '',
-    ubicacion_id: profile.ubicacion_id || '',
-    que_busco_id: profile.que_busco_id || '',
-    orientacion_sexual_id: profile.orientacion_sexual_id || '',
-    edad_min: profile.edad_min || 18,
-    edad_max: profile.edad_max || 65,
-    distancia_maxima: profile.distancia_maxima || 20,
-    escuela_coaching_id: profile.escuela_coaching_id || ''
-  } : null
+    handleSubmit
+  } = useProfileForm()
 
   // Mostrar loading mientras se cargan los datos
   if (loading) {
@@ -79,23 +58,13 @@ export default function PerfilPage() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-8" noValidate>
-          {formData && (
+          {profile && (
             <>
               {/* Información Básica */}
-              <InformacionBasica
-                formData={formData}
-                handleInputChange={handleInputChange}
-                generosPrimarios={generosPrimarios}
-                ubicaciones={ubicaciones}
-                fieldErrors={fieldErrors}
-              />
+              <InformacionBasica/>
 
               {/* Qué Busco */}
-              <QueBusco
-                formData={formData}
-                handleInputChange={handleInputChange}
-                fieldErrors={fieldErrors}
-              />
+              <QueBusco />
 
               {/* Estilo de Vida */}
               <EstiloDeVida />
@@ -104,11 +73,7 @@ export default function PerfilPage() {
               <Intereses />
 
               {/* Información Profesional */}
-              <InformacionProfesional
-                formData={formData}
-                handleInputChange={handleInputChange}
-                fieldErrors={fieldErrors}
-              />
+              <InformacionProfesional />
             </>
           )}
 

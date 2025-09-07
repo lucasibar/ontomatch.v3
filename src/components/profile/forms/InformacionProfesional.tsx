@@ -1,14 +1,10 @@
 'use client'
 
-import { ProfileFormData } from '@/shared/types/profile'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useAppDispatch, useAppSelector } from '@/store/hooks'
+import { updateProfileLocal } from '@/store/sliceProfile'
 import Select from '@/components/ui/Select'
-
-interface InformacionProfesionalProps {
-  formData: ProfileFormData
-  handleInputChange: (field: keyof ProfileFormData, value: string | number) => void
-  fieldErrors: Record<string, string>
-}
+import Input from '@/components/ui/Input'
 
 // Lista de escuelas que ya existen en la base de datos
 const ESCUELAS_COMUNES = [
@@ -19,12 +15,40 @@ const ESCUELAS_COMUNES = [
   { id: '5361bbca-dd18-44ca-848f-32ef815d3bd3', nombre: 'Escuela de Liderazgo y Coaching' }
 ]
 
-export default function InformacionProfesional({
-  formData,
-  handleInputChange,
-  fieldErrors
-}: InformacionProfesionalProps) {
+export default function InformacionProfesional() {
+  const dispatch = useAppDispatch()
   const [isAccordionOpen, setIsAccordionOpen] = useState(false)
+  
+  // Estados de Redux
+  const { profile } = useAppSelector((state) => state.profile)
+  
+  // Estado local para errores
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
+  
+  // Estado local del formulario - inicializado con datos de profile
+  const [formData, setFormData] = useState({
+    empresa: profile?.info_profesional?.empresa || '',
+    cargo: profile?.info_profesional?.cargo || ''
+  })
+
+  // Actualizar estado local cuando cambie profile (solo si es necesario)
+  useEffect(() => {
+    if (profile.info_profesional) {
+      setFormData(profile.info_profesional)
+    }
+  }, [profile.info_profesional])
+
+  // Función para manejar cambios en empresa y cargo
+  const handleInfoProfesionalChange = (field: string, value: string) => {
+    const newData = { ...formData, [field]: value }
+    setFormData(newData) // Actualizar estado local
+    dispatch(updateProfileLocal({ info_profesional: newData })) // Actualizar Redux
+  }
+
+  // Función para manejar cambios en escuela_coaching_id
+  const handleEscuelaChange = (value: string) => {
+    dispatch(updateProfileLocal({ escuela_coaching_id: value }))
+  }
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200">
@@ -59,15 +83,54 @@ export default function InformacionProfesional({
           isAccordionOpen ? 'opacity-100 max-h-screen' : 'opacity-100 max-h-32'
         }`}>
 
-          {/* Escuela de Coaching - Siempre visible pero se desplaza */}
+          {/* Campos de información profesional - Solo visibles cuando el acordeón está abierto */}
+          {isAccordionOpen && (
+            <div className="space-y-6">
+              {/* Empresa */}
+              <div>
+                <Input
+                  id="empresa"
+                  name="empresa"
+                  type="text"
+                  value={formData.empresa || ''}
+                  onChange={(e) => handleInfoProfesionalChange('empresa', e.target.value)}
+                  label="Empresa"
+                  placeholder="Ingresa el nombre de tu empresa"
+                  required
+                />
+                {fieldErrors.empresa && (
+                  <p className="mt-1 text-sm text-red-600">{fieldErrors.empresa}</p>
+                )}
+              </div>
+
+              {/* Cargo */}
+              <div>
+                <Input
+                  id="cargo"
+                  name="cargo"
+                  type="text"
+                  value={formData.cargo || ''}
+                  onChange={(e) => handleInfoProfesionalChange('cargo', e.target.value)}
+                  label="Cargo"
+                  placeholder="Ingresa tu cargo o posición"
+                  required
+                />
+                {fieldErrors.cargo && (
+                  <p className="mt-1 text-sm text-red-600">{fieldErrors.cargo}</p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Escuela de Coaching - Siempre visible, se desplaza hacia abajo cuando se abre el acordeón */}
           <div className={`transition-all duration-300 ease-in-out ${
             isAccordionOpen ? 'mt-8' : 'mt-0'
           }`}>
             <Select
               id="escuela_coaching"
               name="escuela_coaching"
-              value={formData.escuela_coaching_id || ''}
-              onChange={(value) => handleInputChange('escuela_coaching_id', value)}
+              value={profile.escuela_coaching_id || ''}
+              onChange={handleEscuelaChange}
               options={ESCUELAS_COMUNES}
               label="Escuela de Coaching"
               placeholder="Selecciona tu escuela de coaching"

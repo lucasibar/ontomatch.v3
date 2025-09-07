@@ -1,12 +1,16 @@
 'use client'
 
-import { useEstiloVida } from '@/features/profile/hooks/useEstiloVida'
+import { useState, useEffect } from 'react'
+import { useAppDispatch, useAppSelector } from '@/store/hooks'
+import { updateProfileLocal } from '@/store/sliceProfile'
 import Select from '@/components/ui/Select'
-import { useState } from 'react'
 
 export default function EstiloDeVida() {
+  const dispatch = useAppDispatch()
   const [isOpen, setIsOpen] = useState(false)
   
+  // Estados de Redux
+  const { profile } = useAppSelector((state) => state.profile)
   const { 
     opcionesHijos,
     opcionesFrecuenciaAlcohol,
@@ -17,11 +21,36 @@ export default function EstiloDeVida() {
     opcionesSignosZodiacales,
     opcionesMascotas,
     opcionesHabitosAlimentacion,
-    formData, 
     loading, 
-    error,
-    handleFormUpdate
-  } = useEstiloVida()
+    error
+  } = useAppSelector((state) => state.estiloVida)
+
+  // Estado local del formulario - inicializado con datos de profile
+  const [formData, setFormData] = useState({
+    hijos_id: profile?.estilo_vida_id?.hijos_id || '',
+    frecuencia_alcohol_id: profile?.estilo_vida_id?.frecuencia_alcohol_id || '',
+    frecuencia_fumar_id: profile?.estilo_vida_id?.frecuencia_fumar_id || '',
+    ejercicio_id: profile?.estilo_vida_id?.ejercicio_id || '',
+    redes_sociales_id: profile?.estilo_vida_id?.redes_sociales_id || '',
+    habitos_sueno_id: profile?.estilo_vida_id?.habitos_sueno_id || '',
+    signo_zodiacal_id: profile?.estilo_vida_id?.signo_zodiacal_id || '',
+    mascotas_id: profile?.estilo_vida_id?.mascotas_id || '',
+    habitos_alimentacion_id: profile?.estilo_vida_id?.habitos_alimentacion_id || ''
+  })
+
+  // Actualizar estado local cuando cambie profile (solo si es necesario)
+  useEffect(() => {
+    if (profile.estilo_vida_id) {
+      setFormData(profile.estilo_vida_id)
+    }
+  }, [profile.estilo_vida_id])
+
+  // Función para manejar cambios
+  const handleFormUpdate = (field: string, value: string) => {
+    const newData = { ...formData, [field]: value }
+    setFormData(newData) // Actualizar estado local
+    dispatch(updateProfileLocal({ estilo_vida_id: newData })) // Actualizar Redux
+  }
 
   const toggleAccordion = () => {
     setIsOpen(!isOpen)
@@ -69,7 +98,7 @@ export default function EstiloDeVida() {
               id="hijos"
               name="hijos"
               value={formData.hijos_id}
-              onChange={(value) => handleFormUpdate({ hijos_id: value })}
+              onChange={(value) => handleFormUpdate('hijos_id', value)}
               options={opcionesHijos}
               label=""
               placeholder="Selecciona tu situación con los hijos"
@@ -85,7 +114,7 @@ export default function EstiloDeVida() {
               id="frecuencia_alcohol"
               name="frecuencia_alcohol"
               value={formData.frecuencia_alcohol_id}
-              onChange={(value) => handleFormUpdate({ frecuencia_alcohol_id: value })}
+              onChange={(value) => handleFormUpdate('frecuencia_alcohol_id', value)}
               options={opcionesFrecuenciaAlcohol}
               label=""
               placeholder="Selecciona tu frecuencia de consumo de alcohol"
@@ -101,7 +130,7 @@ export default function EstiloDeVida() {
               id="frecuencia_fumar"
               name="frecuencia_fumar"
               value={formData.frecuencia_fumar_id}
-              onChange={(value) => handleFormUpdate({ frecuencia_fumar_id: value })}
+              onChange={(value) => handleFormUpdate('frecuencia_fumar_id', value)}
               options={opcionesFrecuenciaFumar}
               label=""
               placeholder="Selecciona tu frecuencia de fumar"
@@ -117,7 +146,7 @@ export default function EstiloDeVida() {
               id="ejercicio"
               name="ejercicio"
               value={formData.ejercicio_id}
-              onChange={(value) => handleFormUpdate({ ejercicio_id: value })}
+              onChange={(value) => handleFormUpdate('ejercicio_id', value)}
               options={opcionesEjercicio}
               label=""
               placeholder="Selecciona tu nivel de ejercicio"
@@ -133,7 +162,7 @@ export default function EstiloDeVida() {
               id="redes_sociales"
               name="redes_sociales"
               value={formData.redes_sociales_id}
-              onChange={(value) => handleFormUpdate({ redes_sociales_id: value })}
+              onChange={(value) => handleFormUpdate('redes_sociales_id', value)}
               options={opcionesRedesSociales}
               label=""
               placeholder="Selecciona tu uso de redes sociales"
@@ -149,7 +178,7 @@ export default function EstiloDeVida() {
               id="habitos_sueno"
               name="habitos_sueno"
               value={formData.habitos_sueno_id}
-              onChange={(value) => handleFormUpdate({ habitos_sueno_id: value })}
+              onChange={(value) => handleFormUpdate('habitos_sueno_id', value)}
               options={opcionesHabitosSueno}
               label=""
               placeholder="Selecciona tus hábitos de sueño"
@@ -165,7 +194,7 @@ export default function EstiloDeVida() {
               id="signo_zodiacal"
               name="signo_zodiacal"
               value={formData.signo_zodiacal_id}
-              onChange={(value) => handleFormUpdate({ signo_zodiacal_id: value })}
+              onChange={(value) => handleFormUpdate('signo_zodiacal_id', value)}
               options={opcionesSignosZodiacales}
               label=""
               placeholder="Selecciona tu signo zodiacal"
@@ -181,7 +210,7 @@ export default function EstiloDeVida() {
               id="mascotas"
               name="mascotas"
               value={formData.mascotas_id}
-              onChange={(value) => handleFormUpdate({ mascotas_id: value })}
+              onChange={(value) => handleFormUpdate('mascotas_id', value)}
               options={opcionesMascotas}
               label=""
               placeholder="Selecciona tu situación con mascotas"
@@ -197,7 +226,7 @@ export default function EstiloDeVida() {
               id="habitos_alimentacion"
               name="habitos_alimentacion"
               value={formData.habitos_alimentacion_id}
-              onChange={(value) => handleFormUpdate({ habitos_alimentacion_id: value })}
+              onChange={(value) => handleFormUpdate('habitos_alimentacion_id', value)}
               options={opcionesHabitosAlimentacion}
               label=""
               placeholder="Selecciona tus hábitos alimentarios"

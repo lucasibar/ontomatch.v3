@@ -4,6 +4,7 @@ export interface Profile {
   email: string
   descripcion: string | null
   edad: number | null
+  altura: number | null
   genero_primario_id: string | null
   genero_secundario_id: string | null
   ubicacion_id: string | null
@@ -13,9 +14,23 @@ export interface Profile {
   edad_max: number | null
   distancia_maxima: number | null
   escuela_coaching_id: string | null
-  estilo_vida_id: string | null
-  info_profesional_id: string | null
+  estilo_vida_id: {
+    hijos_id: string
+    frecuencia_alcohol_id: string
+    frecuencia_fumar_id: string
+    ejercicio_id: string
+    redes_sociales_id: string
+    habitos_sueno_id: string
+    signo_zodiacal_id: string
+    mascotas_id: string
+    habitos_alimentacion_id: string
+  }
+  info_profesional: {
+    empresa: string
+    cargo: string
+  }
   info_basica_cargada: boolean
+  intereses_ids: string[]
   created_at: string | null
   updated_at: string | null
 }
@@ -44,6 +59,8 @@ export interface ProfileFormData {
   edad_max: number
   distancia_maxima: number
   escuela_coaching_id: string
+  empresa: string
+  cargo: string
 }
 
 export interface Ubicacion {

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useAuth } from '@/features/auth/hooks/useAuth'
-import { useProfile } from '@/features/profile/hooks/useProfile'
+import { useProfileForm } from '@/features/profile/hooks/useProfileForm'
 import { supabase } from '@/lib/supabase'
 
 export function useProfileGuard() {

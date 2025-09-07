@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/features/auth/hooks/useAuth'
-import { useProfile } from '@/features/profile/hooks/useProfile'
+import { useProfileForm } from '@/features/profile/hooks/useProfileForm'
 import ProfileIncompleteAlert from '@/components/profile/ProfileIncompleteAlert'
 import { Heart } from 'lucide-react'
 import { supabase } from '@/lib/supabase'
@@ -15,7 +15,7 @@ interface SimpleSwipesGuardProps {
 export default function SimpleSwipesGuard({ children }: SimpleSwipesGuardProps) {
   const router = useRouter()
   const { user } = useAuth()
-  const { profile, loading: profileLoading } = useProfile()
+  const { profile, loading: profileLoading } = useProfileForm()
   const [isLoading, setIsLoading] = useState(true)
   const [hasChecked, setHasChecked] = useState(false)
   const [profileTimeout, setProfileTimeout] = useState(false)

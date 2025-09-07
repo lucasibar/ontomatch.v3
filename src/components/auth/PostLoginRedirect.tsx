@@ -3,12 +3,12 @@
 import { useEffect } from 'react'
 import { useRouter } from 'next/navigation'
 import { useAuth } from '@/features/auth/hooks/useAuth'
-import { useProfile } from '@/features/profile/hooks/useProfile'
+import { useProfileForm } from '@/features/profile/hooks/useProfileForm'
 
 export default function PostLoginRedirect() {
   const router = useRouter()
   const { user } = useAuth()
-  const { profile, loading } = useProfile()
+  const { profile, loading } = useProfileForm()
 
   useEffect(() => {
     // Solo verificar cuando no esté cargando y tengamos datos

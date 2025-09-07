@@ -1,33 +1,94 @@
 'use client'
 
-import { ProfileFormData, GeneroPrimario, Ubicacion } from '@/shared/types/profile'
-import { useMemo, useState } from 'react'
-import { useOrientacionSexual } from '@/features/profile/hooks/useOrientacionSexual'
+import { useMemo, useState, useEffect } from 'react'
+import { useAppDispatch, useAppSelector } from '@/store/hooks'
+import { updateProfileLocal } from '@/store/sliceProfile'
 import Select from '@/components/ui/Select'
 import Input from '@/components/ui/Input'
+import GenderSecondaryModal from './GenderSecondaryModal'
 
-interface InformacionBasicaProps {
-  formData: ProfileFormData
-  handleInputChange: (field: keyof ProfileFormData, value: string | number | null) => void
-  generosPrimarios: GeneroPrimario[]
-  ubicaciones: Ubicacion[]
-  fieldErrors: Record<string, string>
-}
+export default function InformacionBasica() {
+  const dispatch = useAppDispatch()
+  
+  // Estados de Redux
+  const { profile } = useAppSelector((state) => state.profile)
+  const { generosPrimarios } = useAppSelector((state) => state.generos)
+  const { generosSecundarios } = useAppSelector((state) => state.generos)
+  const { ubicaciones } = useAppSelector((state) => state.ubicacion)
+  const { opcionesOrientacionSexual, error: errorOrientacion } = useAppSelector((state) => state.orientacionSexual)
 
-export default function InformacionBasica({
-  formData,
-  handleInputChange,
-  generosPrimarios,
-  ubicaciones,
-  fieldErrors,
-}: InformacionBasicaProps) {
-  const { opcionesOrientacionSexual, loading: loadingOrientacion, error: errorOrientacion } = useOrientacionSexual()
-
+  // Estado local del formulario - inicializado con datos de profile
+  const [formData, setFormData] = useState({
+    nombre_completo: profile?.nombre_completo || '',
+    descripcion: profile?.descripcion || '',
+    edad: profile?.edad || 0,
+    altura: profile?.altura || 0,
+    genero_primario_id: profile?.genero_primario_id || '',
+    genero_secundario_id: profile?.genero_secundario_id || '',
+    orientacion_sexual_id: profile?.orientacion_sexual_id || '',
+    ubicacion_id: profile?.ubicacion_id || ''
+  })
+  
   // Estados para los selects de ubicación
   const [provinciaSeleccionada, setProvinciaSeleccionada] = useState('')
   const [ciudadSeleccionada, setCiudadSeleccionada] = useState('')
+  const [isGenderSecondaryModalOpen, setIsGenderSecondaryModalOpen] = useState(false)
+  
+  // Estado local para errores de validación (si los usás)
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
 
-  // Obtener provincias únicas
+  // Actualizar estado local cuando cambie profile
+  useEffect(() => {
+    if (profile) {
+      setFormData({
+        nombre_completo: profile.nombre_completo || '',
+        descripcion: profile.descripcion || '',
+        edad: profile.edad || 0,
+        altura: profile.altura || 0,
+        genero_primario_id: profile.genero_primario_id || '',
+        genero_secundario_id: profile.genero_secundario_id || '',
+        orientacion_sexual_id: profile.orientacion_sexual_id || '',
+        ubicacion_id: profile.ubicacion_id || ''
+      })
+    }
+  }, [profile])
+
+  // Función para manejar cambios en campos básicos
+  const handleInputChange = (field: string, value: string | number | null) => {
+    const newFormData = { ...formData, [field]: value }
+    setFormData(newFormData) // Actualizar estado local
+    dispatch(updateProfileLocal({ [field]: value })) // Actualizar Redux
+  }
+
+  // Función para manejar cambio de género primario
+  const handleGeneroPrimarioChange = (generoId: string) => {
+    const newFormData = { 
+      ...formData, 
+      genero_primario_id: generoId,
+      genero_secundario_id: '' // Limpiar género secundario
+    }
+    setFormData(newFormData)
+    dispatch(updateProfileLocal({ 
+      genero_primario_id: generoId,
+      genero_secundario_id: '' 
+    }))
+  }
+
+  // Función para manejar cambio de género secundario
+  const handleGeneroSecundarioChange = (generoId: string) => {
+    const newFormData = { ...formData, genero_secundario_id: generoId }
+    setFormData(newFormData)
+    dispatch(updateProfileLocal({ genero_secundario_id: generoId }))
+  }
+
+  // Función para manejar cambio de orientación sexual
+  const handleOrientacionSexualChange = (orientacionId: string) => {
+    const newFormData = { ...formData, orientacion_sexual_id: orientacionId }
+    setFormData(newFormData)
+    dispatch(updateProfileLocal({ orientacion_sexual_id: orientacionId }))
+  }
+
+  // Provincias únicas
   const provincias = useMemo(() => {
     const provinciasUnicas = Array.from(new Set(ubicaciones.map(u => u.provincia)))
     return provinciasUnicas.map(provincia => ({
@@ -36,7 +97,7 @@ export default function InformacionBasica({
     }))
   }, [ubicaciones])
 
-  // Obtener ciudades según provincia seleccionada
+  // Ciudades por provincia
   const ciudades = useMemo(() => {
     if (!provinciaSeleccionada) return []
     const ciudadesUnicas = Array.from(new Set(
@@ -50,37 +111,39 @@ export default function InformacionBasica({
     }))
   }, [ubicaciones, provinciaSeleccionada])
 
-  // Obtener localidades según ciudad seleccionada
+  // Localidades por ciudad
   const localidades = useMemo(() => {
     if (!provinciaSeleccionada || !ciudadSeleccionada) return []
     const localidadesUnicas = Array.from(new Set(
       ubicaciones
         .filter(u => u.provincia === provinciaSeleccionada && u.ciudad === ciudadSeleccionada)
         .map(u => u.localidad)
-        .filter(Boolean) // Filtrar nulls
+        .filter(Boolean)
     ))
     return localidadesUnicas.map(localidad => ({
-      id: localidad!,
-      nombre: localidad!
+      id: localidad as string,
+      nombre: localidad as string
     }))
   }, [ubicaciones, provinciaSeleccionada, ciudadSeleccionada])
 
-  // Manejar cambio de provincia
+  // Cambio de provincia
   const handleProvinciaChange = (provincia: string) => {
     setProvinciaSeleccionada(provincia)
     setCiudadSeleccionada('')
-    // Limpiar ubicación seleccionada
-    handleInputChange('ubicacion_id', '')
+    const newFormData = { ...formData, ubicacion_id: '' }
+    setFormData(newFormData)
+    dispatch(updateProfileLocal({ ubicacion_id: '' }))
   }
 
-  // Manejar cambio de ciudad
+  // Cambio de ciudad
   const handleCiudadChange = (ciudad: string) => {
     setCiudadSeleccionada(ciudad)
-    // Limpiar ubicación seleccionada
-    handleInputChange('ubicacion_id', '')
+    const newFormData = { ...formData, ubicacion_id: '' }
+    setFormData(newFormData)
+    dispatch(updateProfileLocal({ ubicacion_id: '' }))
   }
 
-  // Manejar cambio de localidad y encontrar la ubicación correspondiente
+  // Cambio de localidad => setear ubicacion_id
   const handleLocalidadChange = (localidad: string) => {
     const ubicacion = ubicaciones.find(u => 
       u.provincia === provinciaSeleccionada && 
@@ -89,20 +152,28 @@ export default function InformacionBasica({
     )
     
     if (ubicacion) {
-      handleInputChange('ubicacion_id', ubicacion.id)
+      const newFormData = { ...formData, ubicacion_id: ubicacion.id }
+      setFormData(newFormData)
+      dispatch(updateProfileLocal({ ubicacion_id: ubicacion.id }))
     }
   }
 
-  // Inicializar provincia y ciudad cuando se carga el perfil
-  useMemo(() => {
-    if (formData.ubicacion_id && ubicaciones.length > 0) {
-      const ubicacionSeleccionada = ubicaciones.find(u => u.id === formData.ubicacion_id)
+  // Filtrar géneros secundarios según primario
+  const generosSecundariosFiltrados = useMemo(() => {
+    if (!formData.genero_primario_id) return []
+    return generosSecundarios.filter(g => g.genero_primario_id === formData.genero_primario_id)
+  }, [generosSecundarios, formData.genero_primario_id])
+
+  // Inicializar provincia/ciudad desde profile.ubicacion_id
+  useEffect(() => {
+    if (profile.ubicacion_id && ubicaciones.length > 0) {
+      const ubicacionSeleccionada = ubicaciones.find(u => u.id === profile.ubicacion_id)
       if (ubicacionSeleccionada) {
         setProvinciaSeleccionada(ubicacionSeleccionada.provincia)
         setCiudadSeleccionada(ubicacionSeleccionada.ciudad)
       }
     }
-  }, [formData.ubicacion_id, ubicaciones])
+  }, [profile.ubicacion_id, ubicaciones])
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
@@ -120,7 +191,7 @@ export default function InformacionBasica({
             id="nombre_completo"
             name="nombre_completo"
             type="text"
-            value={formData.nombre_completo}
+            value={formData.nombre_completo || ''}
             onChange={(e) => handleInputChange('nombre_completo', e.target.value)}
             className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-violet-500 ${
               fieldErrors.nombre_completo 
@@ -135,7 +206,23 @@ export default function InformacionBasica({
           )}
         </div>
 
-        {/* Edad y Altura en la misma línea */}
+        {/* Descripción */}
+        <div>
+          <label htmlFor="descripcion" className="block text-sm font-medium text-gray-700 mb-2">
+            Descripción
+          </label>
+          <textarea
+            id="descripcion"
+            name="descripcion"
+            value={formData.descripcion || ''}
+            onChange={(e) => handleInputChange('descripcion', e.target.value)}
+            rows={4}
+            className="w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-violet-500 border-gray-300 focus:border-violet-500 resize-y"
+            placeholder="Contá algo sobre vos (opcional)"
+          />
+        </div>
+
+        {/* Edad y Altura */}
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label htmlFor="edad" className="block text-sm font-medium text-gray-700 mb-2">
@@ -147,8 +234,8 @@ export default function InformacionBasica({
               type="number"
               min="18"
               max="100"
-              value={formData.edad}
-              onChange={(e) => handleInputChange('edad', parseInt(e.target.value))}
+              value={formData.edad || ''}
+              onChange={(e) => handleInputChange('edad', parseInt(e.target.value) || 0)}
               className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-violet-500 ${
                 fieldErrors.edad 
                   ? 'border-red-300 focus:border-red-500' 
@@ -162,22 +249,62 @@ export default function InformacionBasica({
             )}
           </div>
 
+          <div>
+            <label htmlFor="altura" className="block text-sm font-medium text-gray-700 mb-2">
+              Altura (cm) <span className="text-red-500">*</span>
+            </label>
+            <input
+              id="altura"
+              name="altura"
+              type="number"
+              min="120"
+              max="220"
+              value={formData.altura || ''}
+              onChange={(e) => handleInputChange('altura', parseInt(e.target.value) || 0)}
+              className={`w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-violet-500 ${
+                fieldErrors.altura 
+                  ? 'border-red-300 focus:border-red-500' 
+                  : 'border-gray-300 focus:border-violet-500'
+              }`}
+              placeholder="Tu altura en cm"
+              required
+            />
+            {fieldErrors.altura && (
+              <p className="mt-1 text-sm text-red-600">{fieldErrors.altura}</p>
+            )}
+          </div>
         </div>
 
-        {/* Género Primario */}
-        <div>
-          <Select
-            id="genero_primario"
-            name="genero_primario"
-            value={formData.genero_primario_id}
-            onChange={(value) => handleInputChange('genero_primario_id', value)}
-            options={generosPrimarios}
-            label="Tu Género Primario"
-            required
-            placeholder="Selecciona tu género primario"
-          />
-          {fieldErrors.genero_primario_id && (
-            <p className="mt-1 text-sm text-red-600">{fieldErrors.genero_primario_id}</p>
+        {/* Género */}
+        <div className="flex items-end gap-2">
+          <div className="flex-1">
+            <Select
+              id="genero_primario"
+              name="genero_primario"
+              value={formData.genero_primario_id || ''}
+              onChange={handleGeneroPrimarioChange}
+              options={generosPrimarios}
+              label="Tu Género"
+              required
+              placeholder="Selecciona tu género"
+            />
+            {fieldErrors.genero_primario_id && (
+              <p className="mt-1 text-sm text-red-600">{fieldErrors.genero_primario_id}</p>
+            )}
+          </div>
+          
+          {/* Botón + para agregar género secundario */}
+          {profile.genero_primario_id && (
+            <button
+              type="button"
+              onClick={() => setIsGenderSecondaryModalOpen(true)}
+              className="w-8 h-8 bg-gray-200 hover:bg-gray-300 text-gray-600 hover:text-gray-700 rounded-full flex items-center justify-center transition-colors duration-200 mb-1"
+              title="Agregar género secundario"
+            >
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+              </svg>
+            </button>
           )}
         </div>
 
@@ -187,20 +314,11 @@ export default function InformacionBasica({
             id="orientacion_sexual"
             name="orientacion_sexual"
             value={formData.orientacion_sexual_id || ''}
-            onChange={(value) => handleInputChange('orientacion_sexual_id', value)}
+            onChange={handleOrientacionSexualChange}
             options={opcionesOrientacionSexual}
             label="Tu Orientación Sexual"
             placeholder="Selecciona tu orientación sexual"
           />
-
-          {/* Estado de carga para orientación sexual */}
-          {loadingOrientacion && (
-            <div className="mt-2 text-sm text-violet-600">
-              Cargando opciones...
-            </div>
-          )}
-
-          {/* Error para orientación sexual */}
           {errorOrientacion && (
             <div className="mt-2 text-sm text-red-600">
               ❌ {errorOrientacion}
@@ -250,7 +368,7 @@ export default function InformacionBasica({
                 id="localidad"
                 name="localidad"
                 value={formData.ubicacion_id ? 
-                  ubicaciones.find(u => u.id === formData.ubicacion_id)?.localidad || '' : ''}
+                  (ubicaciones.find(u => u.id === formData.ubicacion_id)?.localidad || '') : ''}
                 onChange={handleLocalidadChange}
                 options={localidades}
                 label="Localidad"
@@ -260,12 +378,20 @@ export default function InformacionBasica({
             </div>
           </div>
 
-          {/* Error de ubicación */}
           {fieldErrors.ubicacion_id && (
             <p className="mt-1 text-sm text-red-600">{fieldErrors.ubicacion_id}</p>
           )}
         </div>
       </div>
+
+      {/* Modal de género secundario */}
+      <GenderSecondaryModal
+        isOpen={isGenderSecondaryModalOpen}
+        onClose={() => setIsGenderSecondaryModalOpen(false)}
+        onSelect={handleGeneroSecundarioChange}
+        generoPrimarioId={profile.genero_primario_id || ''}
+        generoSecundarioActual={profile.genero_secundario_id || ''}
+      />
     </div>
   )
 }

@@ -8,7 +8,8 @@ import {
   interesesReducer,
   queBuscoReducer,
   orientacionSexualReducer,
-  escuelasCoachingReducer
+  escuelasCoachingReducer,
+  infoProfesionalReducer
 } from './sliceProfile'
 
 export const store = configureStore({
@@ -21,7 +22,8 @@ export const store = configureStore({
     intereses: interesesReducer,
     queBusco: queBuscoReducer,
     orientacionSexual: orientacionSexualReducer,
-    escuelasCoaching: escuelasCoachingReducer
+    escuelasCoaching: escuelasCoachingReducer,
+    infoProfesional: infoProfesionalReducer
   },
 })
 
