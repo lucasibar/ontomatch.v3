@@ -9,7 +9,8 @@ import {
   queBuscoReducer,
   orientacionSexualReducer,
   escuelasCoachingReducer,
-  infoProfesionalReducer
+  infoProfesionalReducer,
+  fotosReducer
 } from './sliceProfile'
 
 export const store = configureStore({
@@ -23,7 +24,8 @@ export const store = configureStore({
     queBusco: queBuscoReducer,
     orientacionSexual: orientacionSexualReducer,
     escuelasCoaching: escuelasCoachingReducer,
-    infoProfesional: infoProfesionalReducer
+    infoProfesional: infoProfesionalReducer,
+    fotos: fotosReducer
   },
 })
 

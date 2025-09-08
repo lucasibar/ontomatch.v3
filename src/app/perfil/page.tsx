@@ -6,7 +6,8 @@ import {
   EstiloDeVida, 
   QueBusco, 
   InformacionProfesional, 
-  Intereses
+  Intereses,
+  FotosPerfil
 } from '@/components/profile/forms'
 
 export default function PerfilPage() {
@@ -62,6 +63,9 @@ export default function PerfilPage() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-8" noValidate>
+          {/* Fotos flotantes en la parte superior derecha */}
+          <FotosPerfil validationErrors={validationErrors}/>
+
           {/* Información Básica */}
           <InformacionBasica validationErrors={validationErrors}/>
 

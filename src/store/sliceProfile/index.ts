@@ -85,3 +85,14 @@ export {
   fetchInfoProfesionalUsuario,
   updateInfoProfesional
 } from './infoProfesionalSlice'
+
+// Fotos Slice
+export { default as fotosReducer } from './fotosSlice'
+export { 
+  fetchFotos, 
+  uploadFoto, 
+  deleteFoto, 
+  reorderFotos,
+  clearFotosError,
+  setUploading 
+} from './fotosSlice'

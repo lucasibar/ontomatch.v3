@@ -29,12 +29,14 @@ import {
   fetchOpcionesMascotas,
   fetchOpcionesHabitosAlimentacion,
   clearProfileError,
+  fetchFotos,
 } from '@/store/sliceProfile' // <- mismo barrel que usabas antes
 
 export function useProfileForm() {
   const dispatch = useAppDispatch()
   const router = useRouter()
   const { profile, loading: loadingProfile, error } = useAppSelector((s) => s.profile)
+  const { fotos } = useAppSelector((s) => s.fotos)
 
   const [submitting, setSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
@@ -77,6 +79,9 @@ export function useProfileForm() {
         dispatch(fetchOpcionesHabitosAlimentacion())
         dispatch(fetchIntereses())
         dispatch(fetchCategoriasIntereses())
+
+        // Cargar fotos del usuario
+        dispatch(fetchFotos(userId))
 
         setDataLoaded(true)
       }
@@ -211,9 +216,14 @@ export function useProfileForm() {
       errors.escuela_coaching_id = 'Debes seleccionar tu escuela de coaching'
     }
     
+    // Validar fotos
+    if (fotos.length < 3) {
+      errors.fotos = `Necesitás al menos 3 fotos. Tenés ${fotos.length} foto${fotos.length !== 1 ? 's' : ''}.`
+    }
+    
     setValidationErrors(errors)
     return Object.keys(errors).length === 0
-  }, [profile])
+  }, [profile, fotos])
 
   // submit
   const handleSubmit = useCallback(
