@@ -117,7 +117,6 @@ export default function SimpleSwipesGuard({ children }: SimpleSwipesGuardProps) 
 
   // Mostrar loading solo si no hay perfil Y está cargando (evitar loop infinito)
   if (!profile && profileLoading && !profileTimeout) {
-    console.log('🔄 SimpleSwipesGuard: Cargando perfil...', { user: !!user, profile: !!profile, profileLoading })
     return (
       <div className="min-h-screen bg-violet-50 flex items-center justify-center">
         <div className="text-center">
@@ -134,7 +133,6 @@ export default function SimpleSwipesGuard({ children }: SimpleSwipesGuardProps) 
 
   // Si hay timeout del perfil, verificar directamente en la BD
   if (profileTimeout && !profile) {
-    console.log('🚨 SimpleSwipesGuard: Timeout del perfil, verificando en BD...')
     // Verificar directamente en la BD y redirigir apropiadamente
     const checkProfileInDB = async () => {
       try {
@@ -179,7 +177,6 @@ export default function SimpleSwipesGuard({ children }: SimpleSwipesGuardProps) 
 
   // Si hay perfil pero está en loading, verificar directamente
   if (profile && profileLoading) {
-    console.log('🔄 SimpleSwipesGuard: Perfil existe pero loading=true, verificando estado...')
     // Si el perfil existe pero loading es true, verificar el estado directamente
     if (profile.info_basica_cargada) {
       // Perfil completo, mostrar swipes
