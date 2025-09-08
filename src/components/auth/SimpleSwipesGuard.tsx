@@ -56,7 +56,6 @@ export default function SimpleSwipesGuard({ children }: SimpleSwipesGuardProps) 
   useEffect(() => {
     if (user && profileLoading) {
       const timeout = setTimeout(() => {
-        console.log('⏰ SimpleSwipesGuard: Timeout del perfil, forzando carga...')
         setProfileTimeout(true)
       }, 5000) // 5 segundos
 
@@ -73,7 +72,6 @@ export default function SimpleSwipesGuard({ children }: SimpleSwipesGuardProps) 
       if (profile.info_basica_cargada) return
       
       try {
-        console.log('🔍 SimpleSwipesGuard: Verificando perfil en BD...')
         const { data, error } = await supabase
           .from('profiles')
           .select('info_basica_cargada')
@@ -81,7 +79,6 @@ export default function SimpleSwipesGuard({ children }: SimpleSwipesGuardProps) 
           .single()
         
         if (!error && data?.info_basica_cargada) {
-          console.log('✅ SimpleSwipesGuard: Perfil está completo en BD, recargando...')
           // El perfil está completo en la BD pero no en el estado local, recargar
           window.location.reload()
         }

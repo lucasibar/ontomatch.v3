@@ -15,15 +15,16 @@ const ESCUELAS_COMUNES = [
   { id: '5361bbca-dd18-44ca-848f-32ef815d3bd3', nombre: 'Escuela de Liderazgo y Coaching' }
 ]
 
-export default function InformacionProfesional() {
+interface InformacionProfesionalProps {
+  validationErrors?: Record<string, string>
+}
+
+export default function InformacionProfesional({ validationErrors = {} }: InformacionProfesionalProps) {
   const dispatch = useAppDispatch()
   const [isAccordionOpen, setIsAccordionOpen] = useState(false)
   
   // Estados de Redux
   const { profile } = useAppSelector((state) => state.profile)
-  
-  // Estado local para errores
-  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
   
   // Estado local del formulario - inicializado con datos de profile
   const [formData, setFormData] = useState({
@@ -98,8 +99,8 @@ export default function InformacionProfesional() {
                   placeholder="Ingresa el nombre de tu empresa"
                   required
                 />
-                {fieldErrors.empresa && (
-                  <p className="mt-1 text-sm text-red-600">{fieldErrors.empresa}</p>
+                {validationErrors.empresa && (
+                  <p className="mt-1 text-sm text-red-500">{validationErrors.empresa}</p>
                 )}
               </div>
 
@@ -115,8 +116,8 @@ export default function InformacionProfesional() {
                   placeholder="Ingresa tu cargo o posición"
                   required
                 />
-                {fieldErrors.cargo && (
-                  <p className="mt-1 text-sm text-red-600">{fieldErrors.cargo}</p>
+                {validationErrors.cargo && (
+                  <p className="mt-1 text-sm text-red-500">{validationErrors.cargo}</p>
                 )}
               </div>
             </div>
@@ -136,8 +137,8 @@ export default function InformacionProfesional() {
               placeholder="Selecciona tu escuela de coaching"
               required
             />
-            {fieldErrors.escuela_coaching_id && (
-              <p className="mt-1 text-sm text-red-600">{fieldErrors.escuela_coaching_id}</p>
+            {validationErrors.escuela_coaching_id && (
+              <p className="mt-1 text-sm text-red-500">{validationErrors.escuela_coaching_id}</p>
             )}
           </div>
         </div>

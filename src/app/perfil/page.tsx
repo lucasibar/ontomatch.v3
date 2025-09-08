@@ -13,8 +13,12 @@ export default function PerfilPage() {
   const { 
     profile, // Ahora profile ya tiene todos los datos completos
     loading,
+    validationErrors,
     handleSubmit
   } = useProfileForm()
+
+  // Separar loading inicial del loading de submit
+  const isSubmitting = loading && !!profile // Si hay profile pero loading es true, es submit
 
   // Mostrar loading mientras se cargan los datos
   if (loading) {
@@ -58,24 +62,20 @@ export default function PerfilPage() {
         </div>
 
         <form onSubmit={handleSubmit} className="space-y-8" noValidate>
-          {profile && (
-            <>
-              {/* Información Básica */}
-              <InformacionBasica/>
+          {/* Información Básica */}
+          <InformacionBasica validationErrors={validationErrors}/>
 
-              {/* Qué Busco */}
-              <QueBusco />
+          {/* Qué Busco */}
+          <QueBusco validationErrors={validationErrors}/>
 
-              {/* Estilo de Vida */}
-              <EstiloDeVida />
+          {/* Estilo de Vida */}
+          <EstiloDeVida />
 
-              {/* Intereses */}
-              <Intereses />
+          {/* Intereses */}
+          <Intereses />
 
-              {/* Información Profesional */}
-              <InformacionProfesional />
-            </>
-          )}
+          {/* Información Profesional */}
+          <InformacionProfesional validationErrors={validationErrors}/>
 
           {/* Botón de Guardar */}
           <div className="pt-6">
@@ -83,9 +83,20 @@ export default function PerfilPage() {
               <div className="flex justify-center">
                 <button
                   type="submit"
-                  className="px-8 py-3 bg-violet-600 hover:bg-violet-700 text-white rounded-lg font-medium transition-all duration-200 shadow-lg hover:shadow-xl"
+                  disabled={isSubmitting}
+                  className={`px-8 py-3 rounded-lg font-medium transition-all duration-200 shadow-lg hover:shadow-xl flex items-center gap-2 ${
+                    isSubmitting 
+                      ? 'bg-gray-400 cursor-not-allowed' 
+                      : 'bg-violet-600 hover:bg-violet-700'
+                  }`}
                 >
-                  Guardar y Activar Perfil
+                  {isSubmitting && (
+                    <svg className="animate-spin h-4 w-4 text-white" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                  )}
+                  {isSubmitting ? 'Guardando...' : 'Guardar y Activar Perfil'}
                 </button>
               </div>
             </div>

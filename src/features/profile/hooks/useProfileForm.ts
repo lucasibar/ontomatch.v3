@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useAppDispatch, useAppSelector } from '@/store/hooks'
 import { supabase } from '@/lib/supabase'
+import { useRouter } from 'next/navigation'
 
 // perfil
 import { fetchProfile, updateProfile, updateProfileLocal } from '@/store/sliceProfile/profileSlice'
@@ -32,11 +33,14 @@ import {
 
 export function useProfileForm() {
   const dispatch = useAppDispatch()
+  const router = useRouter()
   const { profile, loading: loadingProfile, error } = useAppSelector((s) => s.profile)
 
   const [submitting, setSubmitting] = useState(false)
   const [submitError, setSubmitError] = useState<string | null>(null)
   const [dataLoaded, setDataLoaded] = useState(false)
+  const [initialLoading, setInitialLoading] = useState(true)
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({})
 
   // cargar auth + todo lo necesario (perfil + opciones)
   useEffect(() => {
@@ -45,6 +49,7 @@ export function useProfileForm() {
       const userId = auth.user?.id
       if (!userId) {
         setSubmitError('No hay usuario autenticado')
+        setInitialLoading(false)
         return
       }
 
@@ -75,6 +80,8 @@ export function useProfileForm() {
 
         setDataLoaded(true)
       }
+      
+      setInitialLoading(false)
     })()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dataLoaded])
@@ -184,12 +191,44 @@ export function useProfileForm() {
     []
   )
 
+  // Función para validar campos obligatorios
+  const validateRequiredFields = useCallback(() => {
+    const errors: Record<string, string> = {}
+    
+    if (!profile.nombre_completo || profile.nombre_completo.trim() === '') {
+      errors.nombre_completo = 'Este campo es obligatorio'
+    }
+    
+    if (!profile.genero_primario_id) {
+      errors.genero_primario_id = 'Debes seleccionar tu género'
+    }
+    
+    if (!profile.ubicacion_id) {
+      errors.ubicacion_id = 'Debes seleccionar tu ubicación'
+    }
+    
+    if (!profile.escuela_coaching_id) {
+      errors.escuela_coaching_id = 'Debes seleccionar tu escuela de coaching'
+    }
+    
+    setValidationErrors(errors)
+    return Object.keys(errors).length === 0
+  }, [profile])
+
   // submit
   const handleSubmit = useCallback(
     async (e?: React.FormEvent<HTMLFormElement>) => {
       e?.preventDefault()
-      setSubmitting(true)
       setSubmitError(null)
+      setValidationErrors({})
+
+      // Validar campos obligatorios antes de guardar
+      if (!validateRequiredFields()) {
+        return // No continuar si la validación falla
+      }
+
+      // Solo iniciar loading si la validación pasó
+      setSubmitting(true)
 
       try {
         const userId = profile.id
@@ -240,22 +279,26 @@ export function useProfileForm() {
 
         // 5) refrescar
         await dispatch(fetchProfile(userId))
+        
+        // 6) navegar a swipes si todo salió bien (no cambiar submitting aquí)
+        router.push('/swipes')
+        // No poner setSubmitting(false) aquí porque la navegación es asíncrona
       } catch (err: any) {
         console.error('Error al guardar perfil:', err)
         setSubmitError(err?.message ?? 'Error al guardar el perfil')
-      } finally {
-        setSubmitting(false)
+        setSubmitting(false) // Solo poner false en caso de error
       }
     },
-    [dispatch, profile, syncIntereses, upsertInfoProfesional, upsertEstiloVida]
+    [dispatch, profile, syncIntereses, upsertInfoProfesional, upsertEstiloVida, validateRequiredFields, router]
   )
 
-  const loading = useMemo(() => loadingProfile || submitting, [loadingProfile, submitting])
+  const loading = useMemo(() => initialLoading || loadingProfile || submitting, [initialLoading, loadingProfile, submitting])
 
   return {
     profile,
     loading,
     error: submitError ?? error,
+    validationErrors,
     handleSubmit,
     clearError: () => dispatch(clearProfileError()),
   }

@@ -6,15 +6,16 @@ import { updateProfileLocal } from '@/store/sliceProfile'
 import Select from '@/components/ui/Select'
 import RangeSlider from '@/components/ui/RangeSlider'
 
-export default function QueBusco() {
+interface QueBuscoProps {
+  validationErrors?: Record<string, string>
+}
+
+export default function QueBusco({ validationErrors = {} }: QueBuscoProps) {
   const dispatch = useAppDispatch()
   
   // Estados de Redux
   const { profile } = useAppSelector((state) => state.profile)
   const { opcionesQueBusco, error } = useAppSelector((state) => state.queBusco)
-  
-  // Estado local para errores
-  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
 
   // Opciones de distancia máxima
   const opcionesDistancia = [
@@ -61,8 +62,8 @@ export default function QueBusco() {
             placeholder="Selecciona qué estás buscando"
             required
           />
-          {fieldErrors.que_busco_id && (
-            <p className="mt-1 text-sm text-red-600">{fieldErrors.que_busco_id}</p>
+          {validationErrors.que_busco_id && (
+            <p className="mt-1 text-sm text-red-500">{validationErrors.que_busco_id}</p>
           )}
         </div>
 
@@ -75,9 +76,9 @@ export default function QueBusco() {
             onChange={handleEdadRangeChange}
             label="Rango de Edad que Buscas"
           />
-          {(fieldErrors.edad_min || fieldErrors.edad_max) && (
-            <p className="mt-1 text-sm text-red-600">
-              {fieldErrors.edad_min || fieldErrors.edad_max}
+          {(validationErrors.edad_min || validationErrors.edad_max) && (
+            <p className="mt-1 text-sm text-red-500">
+              {validationErrors.edad_min || validationErrors.edad_max}
             </p>
           )}
         </div>
@@ -94,8 +95,8 @@ export default function QueBusco() {
             placeholder="Selecciona la distancia máxima"
             required
           />
-          {fieldErrors.distancia_maxima && (
-            <p className="mt-1 text-sm text-red-600">{fieldErrors.distancia_maxima}</p>
+          {validationErrors.distancia_maxima && (
+            <p className="mt-1 text-sm text-red-500">{validationErrors.distancia_maxima}</p>
           )}
         </div>
 

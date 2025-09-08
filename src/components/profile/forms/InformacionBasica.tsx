@@ -7,7 +7,11 @@ import Select from '@/components/ui/Select'
 import Input from '@/components/ui/Input'
 import GenderSecondaryModal from './GenderSecondaryModal'
 
-export default function InformacionBasica() {
+interface InformacionBasicaProps {
+  validationErrors?: Record<string, string>
+}
+
+export default function InformacionBasica({ validationErrors = {} }: InformacionBasicaProps) {
   const dispatch = useAppDispatch()
   
   // Estados de Redux
@@ -201,8 +205,8 @@ export default function InformacionBasica() {
             placeholder="Tu nombre completo"
             required
           />
-          {fieldErrors.nombre_completo && (
-            <p className="mt-1 text-sm text-red-600">{fieldErrors.nombre_completo}</p>
+          {validationErrors.nombre_completo && (
+            <p className="mt-1 text-sm text-red-500">{validationErrors.nombre_completo}</p>
           )}
         </div>
 
@@ -244,8 +248,8 @@ export default function InformacionBasica() {
               placeholder="Tu edad"
               required
             />
-            {fieldErrors.edad && (
-              <p className="mt-1 text-sm text-red-600">{fieldErrors.edad}</p>
+            {validationErrors.edad && (
+              <p className="mt-1 text-sm text-red-500">{validationErrors.edad}</p>
             )}
           </div>
 
@@ -269,8 +273,8 @@ export default function InformacionBasica() {
               placeholder="Tu altura en cm"
               required
             />
-            {fieldErrors.altura && (
-              <p className="mt-1 text-sm text-red-600">{fieldErrors.altura}</p>
+            {validationErrors.altura && (
+              <p className="mt-1 text-sm text-red-500">{validationErrors.altura}</p>
             )}
           </div>
         </div>
@@ -288,8 +292,8 @@ export default function InformacionBasica() {
               required
               placeholder="Selecciona tu género"
             />
-            {fieldErrors.genero_primario_id && (
-              <p className="mt-1 text-sm text-red-600">{fieldErrors.genero_primario_id}</p>
+            {validationErrors.genero_primario_id && (
+              <p className="mt-1 text-sm text-red-500">{validationErrors.genero_primario_id}</p>
             )}
           </div>
           
@@ -378,8 +382,8 @@ export default function InformacionBasica() {
             </div>
           </div>
 
-          {fieldErrors.ubicacion_id && (
-            <p className="mt-1 text-sm text-red-600">{fieldErrors.ubicacion_id}</p>
+          {validationErrors.ubicacion_id && (
+            <p className="mt-1 text-sm text-red-500">{validationErrors.ubicacion_id}</p>
           )}
         </div>
       </div>
