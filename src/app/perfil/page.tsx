@@ -9,6 +9,8 @@ import {
   Intereses,
   FotosPerfil
 } from '@/components/profile/forms'
+import AppLayout from '@/components/layout/AppLayout'
+import AppGuard from '@/components/auth/AppGuard'
 
 export default function PerfilPage() {
   const { 
@@ -53,14 +55,16 @@ export default function PerfilPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-4xl mx-auto px-4">
-        <div className="mb-8">
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Mi Perfil</h1>
-            <p className="text-gray-600 mt-2">Completa tu información para encontrar tu match perfecto</p>
-          </div>
-        </div>
+    <AppGuard>
+      <AppLayout>
+        <div className="py-8">
+          <div className="max-w-4xl mx-auto px-4">
+            <div className="mb-8">
+              <div>
+                <h1 className="text-3xl font-bold text-gray-900">Mi Perfil</h1>
+                <p className="text-gray-600 mt-2">Completa tu información para encontrar tu match perfecto</p>
+              </div>
+            </div>
 
         <form onSubmit={handleSubmit} className="space-y-8" noValidate>
           {/* Fotos flotantes en la parte superior derecha */}
@@ -106,7 +110,9 @@ export default function PerfilPage() {
             </div>
           </div>
         </form>
-      </div>
-    </div>
+          </div>
+        </div>
+      </AppLayout>
+    </AppGuard>
   )
 }

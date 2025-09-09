@@ -1,191 +1,212 @@
 'use client'
 
-import { useAuth } from '@/features/auth/hooks/useAuth'
-import { useProfileForm } from '@/features/profile/hooks/useProfileForm'
-import SimpleSwipesGuard from '@/components/auth/SimpleSwipesGuard'
-import Link from 'next/link'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { useAppSelector } from '@/store/hooks'
+import AppLayout from '@/components/layout/AppLayout'
+import AppGuard from '@/components/auth/AppGuard'
 
-function SwipesContent() {
-  const { user } = useAuth()
-  const { profile } = useProfileForm()
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
+// Mock data - después vendrá de Supabase
+const mockProfiles = [
+  {
+    id: '1',
+    nombre_completo: 'María González',
+    edad: 25,
+    descripcion: 'Me gusta viajar y conocer lugares nuevos. Amo los perros y la música indie.',
+    fotos: [
+      'https://images.unsplash.com/photo-1494790108755-2616b612b786?w=400&h=600&fit=crop&crop=face',
+      'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?w=400&h=600&fit=crop&crop=face'
+    ],
+    ubicacion: 'Buenos Aires, Argentina',
+    intereses: ['Viajes', 'Música', 'Fotografía', 'Cocina']
+  },
+  {
+    id: '2',
+    nombre_completo: 'Carlos Rodríguez',
+    edad: 28,
+    descripcion: 'Desarrollador de software, fanático del fútbol y la tecnología.',
+    fotos: [
+      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&h=600&fit=crop&crop=face',
+      'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=400&h=600&fit=crop&crop=face'
+    ],
+    ubicacion: 'Córdoba, Argentina',
+    intereses: ['Tecnología', 'Fútbol', 'Programación', 'Videojuegos']
+  },
+  {
+    id: '3',
+    nombre_completo: 'Ana Martínez',
+    edad: 26,
+    descripcion: 'Psicóloga, amante de la naturaleza y los libros. Busco conexiones auténticas.',
+    fotos: [
+      'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400&h=600&fit=crop&crop=face',
+      'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400&h=600&fit=crop&crop=face'
+    ],
+    ubicacion: 'Rosario, Argentina',
+    intereses: ['Psicología', 'Naturaleza', 'Lectura', 'Meditación']
+  }
+]
 
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen)
+export default function SwipesPage() {
+  const { profile } = useAppSelector((state) => state.profile)
+  const [currentProfileIndex, setCurrentProfileIndex] = useState(0)
+  const [profiles, setProfiles] = useState(mockProfiles)
+  const [loading, setLoading] = useState(false)
+
+  const currentProfile = profiles[currentProfileIndex]
+
+  const handleSwipe = async (action: 'like' | 'dislike') => {
+    if (!currentProfile) return
+
+    setLoading(true)
+    
+    try {
+      // Aquí irá la lógica para guardar el swipe en Supabase
+      console.log(`${action} a ${currentProfile.nombre_completo}`)
+      
+      // Simular delay de API
+      await new Promise(resolve => setTimeout(resolve, 500))
+      
+      // Pasar al siguiente perfil
+      setCurrentProfileIndex(prev => prev + 1)
+    } catch (error) {
+      console.error('Error al procesar swipe:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  // Si no hay más perfiles
+  if (currentProfileIndex >= profiles.length) {
+    return (
+      <AppGuard>
+        <AppLayout>
+          <div className="min-h-screen flex items-center justify-center p-4">
+            <div className="text-center max-w-md">
+              <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg className="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                </svg>
+              </div>
+              <h2 className="text-2xl font-bold text-gray-900 mb-4">
+                ¡No hay más perfiles!
+              </h2>
+              <p className="text-gray-600 mb-6">
+                Has visto todos los perfiles disponibles por hoy. Vuelve mañana para descubrir más personas.
+              </p>
+              <button
+                onClick={() => setCurrentProfileIndex(0)}
+                className="px-6 py-3 bg-violet-600 hover:bg-violet-700 text-white rounded-lg font-medium transition-colors duration-200"
+              >
+                Ver de nuevo
+              </button>
+            </div>
+          </div>
+        </AppLayout>
+      </AppGuard>
+    )
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header */}
-      <header className="bg-white shadow-sm border-b border-gray-200">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center h-16">
-            {/* Nombre del usuario 
-            <div className="flex items-center">
-              <span className="text-lg font-medium text-gray-900">
-                {profile?.nombre_completo || user?.email || 'Usuario'}
-              </span>
-            </div>
-*/}
-            {/* Título OntoMatch centrado */}
-            <div className="flex-1 flex justify-center">
-              <h1 className="text-2xl font-bold text-violet-600">
-                OntoMatch
-              </h1>
+    <AppGuard>
+      <AppLayout>
+        <div className="min-h-screen p-4">
+          <div className="max-w-md mx-auto">
+            {/* Header */}
+            <div className="text-center mb-6">
+              <h1 className="text-2xl font-bold text-gray-900 mb-2">Descubrir</h1>
+              <p className="text-gray-600">
+                {currentProfileIndex + 1} de {profiles.length} perfiles
+              </p>
             </div>
 
-            {/* Menú */}
-            <div className="relative">
-              <button
-                onClick={toggleMenu}
-                className="p-2 rounded-md text-gray-600 hover:text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-violet-500"
-                aria-label="Abrir menú"
-              >
-                <svg
-                  className="w-6 h-6"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M4 6h16M4 12h16M4 18h16"
+            {/* Profile Card */}
+            {currentProfile && (
+              <div className="bg-white rounded-2xl shadow-lg overflow-hidden mb-6">
+                {/* Photo */}
+                <div className="relative h-96">
+                  <img
+                    src={currentProfile.fotos[0]}
+                    alt={currentProfile.nombre_completo}
+                    className="w-full h-full object-cover"
                   />
+                  
+                  {/* Loading overlay */}
+                  {loading && (
+                    <div className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+                      <div className="text-white text-center">
+                        <svg className="animate-spin h-8 w-8 mx-auto mb-2" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <p className="text-sm">Procesando...</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Profile Info */}
+                <div className="p-6">
+                  <div className="flex items-center justify-between mb-3">
+                    <h2 className="text-2xl font-bold text-gray-900">
+                      {currentProfile.nombre_completo}, {currentProfile.edad}
+                    </h2>
+                    <span className="text-gray-500 text-sm">
+                      📍 {currentProfile.ubicacion}
+                    </span>
+                  </div>
+
+                  {currentProfile.descripcion && (
+                    <p className="text-gray-700 mb-4 leading-relaxed">
+                      {currentProfile.descripcion}
+                    </p>
+                  )}
+
+                  {/* Interests */}
+                  {currentProfile.intereses && currentProfile.intereses.length > 0 && (
+                    <div className="mb-6">
+                      <h3 className="text-sm font-semibold text-gray-900 mb-2">Intereses</h3>
+                      <div className="flex flex-wrap gap-2">
+                        {currentProfile.intereses.map((interes, index) => (
+                          <span
+                            key={index}
+                            className="px-3 py-1 bg-violet-100 text-violet-700 rounded-full text-sm"
+                          >
+                            {interes}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {/* Action Buttons */}
+            <div className="flex justify-center gap-6">
+              {/* Dislike Button */}
+              <button
+                onClick={() => handleSwipe('dislike')}
+                disabled={loading}
+                className="w-16 h-16 bg-white border-2 border-gray-300 rounded-full flex items-center justify-center shadow-lg hover:border-red-400 hover:bg-red-50 transition-colors duration-200 disabled:opacity-50"
+              >
+                <svg className="w-8 h-8 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                 </svg>
               </button>
 
-              {/* Dropdown del menú */}
-              {isMenuOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg py-1 z-50 border border-gray-200">
-                  <Link
-                    href="/perfil"
-                    className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900 transition-colors duration-200"
-                    onClick={() => setIsMenuOpen(false)}
-                  >
-                    <div className="flex items-center">
-                      <svg
-                        className="w-4 h-4 mr-2"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={2}
-                          d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"
-                        />
-                      </svg>
-                      Editar Perfil
-                    </div>
-                  </Link>
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Contenido principal */}
-      <main className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Estadísticas del perfil */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-violet-100 rounded-full flex items-center justify-center">
-                  <svg className="w-5 h-5 text-violet-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                  </svg>
-                </div>
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-500">Perfil</p>
-                <p className="text-2xl font-semibold text-gray-900">Completo</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
-                  <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                  </svg>
-                </div>
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-500">Matches</p>
-                <p className="text-2xl font-semibold text-gray-900">0</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <div className="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center">
-                  <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                  </svg>
-                </div>
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-500">Mensajes</p>
-                <p className="text-2xl font-semibold text-gray-900">0</p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Área de swipes */}
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-8">
-          <div className="text-center">
-            <div className="mx-auto h-24 w-24 bg-gray-100 rounded-full flex items-center justify-center mb-6">
-              <svg className="h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-              </svg>
-            </div>
-            <h2 className="text-2xl font-bold text-gray-900 mb-4">
-              ¡Bienvenido a OntoMatch!
-            </h2>
-            <p className="text-lg text-gray-600 mb-6">
-              Tu perfil está completo. Pronto podrás descubrir personas increíbles cerca de ti.
-            </p>
-            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-              <button className="px-6 py-3 bg-violet-600 text-white rounded-lg hover:bg-violet-700 transition-colors duration-200 font-medium">
-                Explorar Perfiles
-              </button>
-              <Link 
-                href="/perfil"
-                className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors duration-200 font-medium"
+              {/* Like Button */}
+              <button
+                onClick={() => handleSwipe('like')}
+                disabled={loading}
+                className="w-16 h-16 bg-white border-2 border-gray-300 rounded-full flex items-center justify-center shadow-lg hover:border-green-400 hover:bg-green-50 transition-colors duration-200 disabled:opacity-50"
               >
-                Editar Perfil
-              </Link>
+                <svg className="w-8 h-8 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                </svg>
+              </button>
             </div>
           </div>
         </div>
-      </main>
-
-      {/* Overlay para cerrar el menú al hacer click fuera */}
-      {isMenuOpen && (
-        <div
-          className="fixed inset-0 z-40"
-          onClick={() => setIsMenuOpen(false)}
-        />
-      )}
-    </div>
-  )
-}
-
-export default function SwipesPage() {
-  return (
-    <SimpleSwipesGuard>
-      <SwipesContent />
-    </SimpleSwipesGuard>
+      </AppLayout>
+    </AppGuard>
   )
 }
